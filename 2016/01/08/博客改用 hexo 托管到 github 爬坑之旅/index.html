@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://ww3.sinaimg.cn/large/65312d9agw1ezy032rvmej20b403zt9g.jpg">
 <meta property="og:image" content="http://ww4.sinaimg.cn/large/65312d9agw1ezy032cl8uj20b406ct94.jpg">
 <meta property="og:image" content="http://ww2.sinaimg.cn/large/65312d9agw1ezy0323yb3j20dw03cwf3.jpg">
-<meta property="og:updated_time" content="2016-01-13T09:50:36.000Z">
+<meta property="og:updated_time" content="2016-01-13T11:47:25.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="博客改用 hexo 托管到 github 爬坑之旅">
 <meta name="twitter:description" content="最近又蛋疼了，这个博客原本是用 Octopress 搭建的，搭建过程 详见这里。直到最近在知乎上看到 这个提问，我又决定把博客从 Octopress 转为 Hexo 了。
@@ -222,32 +222,13 @@
 <p>下面最主要就是总结一下我遇到的问题，关于博客托管到 github 的问题。声明一下，我是完全不懂 js 网页这些东西的，所以下面写的东西，也只是我个人层面上的理解，所以如果有什么地方说的有问题，轻喷。</p>
 <a id="more"></a>
 <p>在讲述我遇到的坑的问题之前，有必要先讲解一下 hexo 工程的文件划分。</p>
-<p>hexo 的源码目录大概是这样：</p>
-<p><img src="http://ww4.sinaimg.cn/large/65312d9agw1ezxy3ebuqjj20b408twf1.jpg" alt="hexo目录结构"></p>
-<p><strong>public</strong></p>
-<p>在 clone 了 hexo 项目之后，应该是是没有 <code>public</code> 这个文件夹的。当执行 <code>hexo g</code> 时（g 是 generate 的缩写，意思是生成），hexo 会生成 <code>public</code> 这个文件夹和里面的文件，所以 <code>/public</code> 文件夹中放置的文件，自然就是最终网页显示需要的静态网页文件，这个是因每个人博客的内容不同而不同，所以源码中不必要存在这个文件夹，这一点在我们查看 .gitignore 时会发现，这个文件夹是被忽略的，并不需要上传。</p>
-<p>当我们写好博客之后，执行 <code>hexo g</code> 生成网页文件，然后执行 <code>hexo d</code>，就会将 <code>public</code> 里面的文件 post 在 <code>github</code> 的 username.github.com 这个仓库，之后就能访问你的博客了。</p>
-<p><strong>source</strong></p>
-<p>这个文件夹是用来存放你博客的文本内容。</p>
-<p>打开 <code>/source</code> 之后，发现有一个 <code>_post</code> 文件夹，此文件夹中就是存放你所有博文内容的文件夹，博文是用markdown 来写的，写好之后，放入 <code>_post</code> 即可。除此之外 <code>source</code> 还可以加入 <code>about</code> 等文件夹，用来写 <code>关于我</code> 等页面的文本内容。</p>
-<p><strong>theme</strong></p>
-<p>theme 自然就是放置博客主题的文件夹，比如源生的主题：<code>landscape</code>。自己通过 clone 安装的三方主题也会出现在这里。</p>
-<p><strong>_config.yml 等</strong></p>
-<p>剩下的这些就是配置文件等，除此之外其他的我也不知道是些什么东西。</p>
-<p>在了解了 hexo 整体的目录结构之后，就具体讲一讲让我蛋疼的坑。</p>
-<p>我在 clone 完 hexo 这个项目之后，发现主题不是很好看，就想换一个主题，于是乎我去找了个漂亮的第三方主题并且 clone 到了 <code>/theme</code> 文件夹下。然后发现这个主题需要做一些配置，所以就在 <code>/theme/xxx主题/..</code> 怒改造了一下，之后<code>hexo g</code> <code>hexo s</code>， 然后预览了一下，嗯~~还不错，于是 <code>hexo d</code> 将博客的静态文件 push 到了我的 github 的 maquannene.github.com 仓库的 master 分支上面。最后根据当时使用 Octopress 的经验，我又将 hexo 的源码我也要推到 maquannene.github.com 的另一个分支，比如 hexo。下一次换个新环境写博客时，只用将 clone 一下 hexo 这个分支，然后写写博文，<code>hexo g</code> <code>hexo d</code> 就ok了。</p>
-<p>在确定已经将 hexo 文件 post 到 github 之后，我将本地的 hexo 文件夹直接删掉，准备尝试一下重新拉取自己 github 上 hexo 项目，继续写博客的流程。</p>
-<p>如上面所述，clone 自己 github 的 hexo，执行 <code>hexo g</code>，这是我发现报了很多 WARNING：<br><br><img src="http://ww3.sinaimg.cn/large/65312d9agw1ezy032rvmej20b403zt9g.jpg" alt="无主题生成错误"></p>
-<p>在执行 <code>hexo s</code> 后访问：<code>localhost：4000</code> 发现什么也没有显示。<br>于是我检查了一遍 clone 下来的 hexo，发现是我先前安装的的 <code>yelee</code> 主题文件夹中什么文件都没有，默认的主题 <code>landscape</code> 却存在。我以为是 github clone 出了问题，然后我打开我 github 的 hexo 项目，发现 theme/yelee 文件夹是黑色的：<br><br><img src="http://ww4.sinaimg.cn/large/65312d9agw1ezy032cl8uj20b406ct94.jpg" alt="无主题文件"></p>
-<p>这时候我意识到，我在 push hexo 时，并没有将所有的文件 push 上去，于是我默默地从回收站找回来删掉的那个 hexo，仔细查看为什么主题没有被 push 上去。我又尝试在更改了一下 <code>/yelee</code> 中的文件，这时，我在 iterminal 中输入 <code>git diff</code> ，看到了如下信息：<br><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1ezy0323yb3j20dw03cwf3.jpg" alt="gitdiff子repo"></p>
-<p>用了一段时间 git，但是从来没有见过 <code>Subproject</code> 这个关键字，于是 google 一下，发现原来是一个被 git 版本管理的 repo 中的某个文件夹被另外一个 git 进行版本管理着，于是我进到 <code>/theme/yelee</code> 中，输入 <code>ls -a</code> 发现真有一个 <code>.git</code> 文件，然后又输入 <code>git remote -v</code>，发现当前 <code>yelee</code> 主题仓库的 origin 是另外一个远程主机，而不是我自己 github 博客 repo 的主机，恍然大悟，原来在 clone yelee 时，也将 <code>.git</code> 文件 clone 了下来，那么这个 repo 自然就被原来的 git 版本管理。所以当我处在外面文件夹的版本控制中进行 add commit push 时，对里面受另外一个版本控制的文件是无效的。</p>
-<p>到这里，终于弄明白为什么 yelee 没有被 push 上去了。</p>
-<p>于是我在我的 github 中创建了一个主题仓库，并且删除了 yelee 的 origin remote，添加新的 origin 为自己的主题仓库地址，最后将 clone 下来的被自己改过的主题 push 到了我自己的主题 repo 中。</p>
-<p>同样我有建立了一个 hexo 的仓库，将 hexo 推到了 <code>hexo</code> repo 中，而不是 <code>xxx.github.com</code> repo 的 hexo 分支中。</p>
-<p>而当执行 <code>hexo d</code> 时，静态网页仍然部署到的是 xxx.github.com 仓库的 master 分支。</p>
-<p>那么目前为止，我将原来的一个仓库两个分支（ hexo 源码分支，静态网页分支）变成了三个仓库（hexo 源码仓库：<code>hexo</code>，静态网页仓库：<code>xxx.github.com</code>，主题仓库：<code>yelee-theme</code>），每个仓库有自己的主分支。</p>
-<p>这样，我下次拉取博客时，不但需要将 hexo repo 克隆下来，并且还要将自己的主题也从主题仓库中克隆下来。当我更改了博文时，就 push 到 <code>hexo</code> repo ，改了主题时，就 push 到 <code>yelee-theme</code> repo 中，而 <code>hexo d</code> 部署时，会自动 push 到 <code>xxx.github.com</code> repo 中。</p>
-<p>最后这样的结构看来是比原来清晰多了，哎，还是自己将 branch 分支这个概念乱用了，如果是定位不同的文件，就要用 repo 仓库进行区分，而不是推到不同的分支，这是不符合 git 的分支理念的。</p>
+<p>hexo 的源码目录大概是这样：<br><img src="http://ww4.sinaimg.cn/large/65312d9agw1ezxy3ebuqjj20b408twf1.jpg" alt="hexo目录结构"><br><br><strong>public</strong><br>在 clone 了 hexo 项目之后，应该是是没有 <code>public</code> 这个文件夹的。当执行 <code>hexo g</code> 时（g 是 generate 的缩写，意思是生成），hexo 会生成 <code>public</code> 这个文件夹和里面的文件，所以 <code>/public</code> 文件夹中放置的文件，自然就是最终网页显示需要的静态网页文件，这个是因每个人博客的内容不同而不同，所以源码中不必要存在这个文件夹，这一点在我们查看 .gitignore 时会发现，这个文件夹是被忽略的，并不需要上传。</p>
+<p>当我们写好博客之后，执行 <code>hexo g</code> 生成网页文件，然后执行 <code>hexo d</code>，就会将 <code>public</code> 里面的文件 post 在 <code>github</code> 的 username.github.com 这个仓库，之后就能访问你的博客了。<br><br><strong>source</strong><br>这个文件夹是用来存放你博客的文本内容。<br>打开 <code>/source</code> 之后，发现有一个 <code>_post</code> 文件夹，此文件夹中就是存放你所有博文内容的文件夹，博文是用markdown 来写的，写好之后，放入 <code>_post</code> 即可。除此之外 <code>source</code> 还可以加入 <code>about</code> 等文件夹，用来写 <code>关于我</code> 等页面的文本内容。<br><br><strong>theme</strong><br>theme 自然就是放置博客主题的文件夹，比如源生的主题：<code>landscape</code>。自己通过 clone 安装的三方主题也会出现在这里。<br><br><strong>_config.yml 等</strong><br>剩下的这些就是配置文件等，除此之外其他的我也不知道是些什么东西。<br><br>在了解了 hexo 整体的目录结构之后，就具体讲一讲让我蛋疼的坑。</p>
+<p>我在 clone 完 hexo 这个项目之后，发现主题不是很好看，就想换一个主题，于是乎我去找了个漂亮的第三方主题并且 clone 到了 <code>/theme</code> 文件夹下。然后发现这个主题需要做一些配置，所以就在 <code>/theme/xxx主题/..</code> 怒改造了一下，之后<code>hexo g</code> <code>hexo s</code>， 然后预览了一下，嗯~~还不错，于是 <code>hexo d</code> 将博客的静态文件 push 到了我的 github 的 maquannene.github.com 仓库的 master 分支上面。最后根据当时使用 Octopress 的经验，我又将 hexo 的源码我也要推到 maquannene.github.com 的另一个分支，比如 hexo。下一次换个新环境写博客时，只用将 clone 一下 hexo 这个分支，然后写写博文，<code>hexo g</code> <code>hexo d</code> 就ok了。<br><br>在确定已经将 hexo 文件 post 到 github 之后，我将本地的 hexo 文件夹直接删掉，准备尝试一下重新拉取自己 github 上 hexo 项目，继续写博客的流程。</p>
+<p>如上面所述，clone 自己 github 的 hexo，执行 <code>hexo g</code>，这是我发现报了很多 WARNING：<br><img src="http://ww3.sinaimg.cn/large/65312d9agw1ezy032rvmej20b403zt9g.jpg" alt="无主题生成错误"></p>
+<p>在执行 <code>hexo s</code> 后访问：<code>localhost：4000</code> 发现什么也没有显示。<br>于是我检查了一遍 clone 下来的 hexo，发现是我先前安装的的 <code>yelee</code> 主题文件夹中什么文件都没有，默认的主题 <code>landscape</code> 却存在。我以为是 github clone 出了问题，然后我打开我 github 的 hexo 项目，发现 theme/yelee 文件夹是黑色的：<br><img src="http://ww4.sinaimg.cn/large/65312d9agw1ezy032cl8uj20b406ct94.jpg" alt="无主题文件"></p>
+<p>这时候我意识到，我在 push hexo 时，并没有将所有的文件 push 上去，于是我默默地从回收站找回来删掉的那个 hexo，仔细查看为什么主题没有被 push 上去。我又尝试在更改了一下 <code>/yelee</code> 中的文件，这时，我在 iterminal 中输入 <code>git diff</code> ，看到了如下信息：<br><img src="http://ww2.sinaimg.cn/large/65312d9agw1ezy0323yb3j20dw03cwf3.jpg" alt="gitdiff子repo"></p>
+<p>用了一段时间 git，但是从来没有见过 <code>Subproject</code> 这个关键字，于是 google 一下，发现原来是一个被 git 版本管理的 repo 中的某个文件夹被另外一个 git 进行版本管理着，于是我进到 <code>/theme/yelee</code> 中，输入 <code>ls -a</code> 发现真有一个 <code>.git</code> 文件，然后又输入 <code>git remote -v</code>，发现当前 <code>yelee</code> 主题仓库的 origin 是另外一个远程主机，而不是我自己 github 博客 repo 的主机，恍然大悟，原来在 clone yelee 时，也将 <code>.git</code> 文件 clone 了下来，那么这个 repo 自然就被原来的 git 版本管理。所以当我处在外面文件夹的版本控制中进行 add commit push 时，对里面受另外一个版本控制的文件是无效的。<br><br>到这里，终于弄明白为什么 yelee 没有被 push 上去了。<br>于是我在我的 github 中创建了一个主题仓库，并且删除了 yelee 的 origin remote，添加新的 origin 为自己的主题仓库地址，最后将 clone 下来的被自己改过的主题 push 到了我自己的主题 repo 中。同样我有建立了一个 hexo 的仓库，将 hexo 推到了 <code>hexo</code> repo 中，而不是 <code>xxx.github.com</code> repo 的 hexo 分支中。s而当执行 <code>hexo d</code> 时，静态网页仍然部署到的是 xxx.github.com 仓库的 master 分支。<br><br>那么目前为止，我将原来的一个仓库两个分支（ hexo 源码分支，静态网页分支）变成了三个仓库（hexo 源码仓库：<code>hexo</code>，静态网页仓库：<code>xxx.github.com</code>，主题仓库：<code>yelee-theme</code>），每个仓库有自己的主分支。<br><br>这样，我下次拉取博客时，不但需要将 hexo repo 克隆下来，并且还要将自己的主题也从主题仓库中克隆下来。当我更改了博文时，就 push 到 <code>hexo</code> repo ，改了主题时，就 push 到 <code>yelee-theme</code> repo 中，而 <code>hexo d</code> 部署时，会自动 push 到 <code>xxx.github.com</code> repo 中。<br><br>最后这样的结构看来是比原来清晰多了，哎，还是自己将 branch 分支这个概念乱用了，如果是定位不同的文件，就要用 repo 仓库进行区分，而不是推到不同的分支，这是不符合 git 的分支理念的。</p>
 
       
     </div>
@@ -259,7 +240,7 @@
         <p><span>本文标题:</span><a href="/2016/01/08/博客改用 hexo 托管到 github 爬坑之旅/">博客改用 hexo 托管到 github 爬坑之旅</a></p>
         <p><span>文章作者:</span><a href="/" title="访问 马权讷讷 的个人博客">马权讷讷</a></p>
         <p><span>发布时间:</span>2016年01月08日 - 13时17分</p>
-        <p><span>最后更新:</span>2016年01月13日 - 17时50分</p>
+        <p><span>最后更新:</span>2016年01月13日 - 19时47分</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2016/01/08/博客改用 hexo 托管到 github 爬坑之旅/" title="博客改用 hexo 托管到 github 爬坑之旅">http://yoursite.com/2016/01/08/博客改用 hexo 托管到 github 爬坑之旅/</a>
             <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/01/08/博客改用 hexo 托管到 github 爬坑之旅/　　作者: 马权讷讷" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
