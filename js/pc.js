@@ -28,19 +28,10 @@ define([], function(){
     }
 
     var slide = function(idx){
-        // 修复IE10+切换无效的bug
-        var $wrap = $(".switch-wrap"),
-          transform = [
-              '-webkit-transform: translate(-' + idx * 100 + '%, 0);',
-              '-moz-transform: translate(-' + idx * 100 + '%, 0);',
-              '-o-transform: translate(-' + idx * 100 + '%, 0);',
-              '-ms-transform: translate(-' + idx * 100 + '%, 0);',
-              'transform: translate(-' + idx * 100 + '%, 0);'
-          ];
-        //$wrap.css({
-        //    "transform": "translate(-"+idx*100+"%, 0 )"
-        //});
-        $wrap[0].style.cssText = transform.join('');
+        var $wrap = $(".switch-wrap");
+        $wrap.css({
+            "transform": "translate(-"+idx*100+"%, 0 )"
+        });
         $(".icon-wrap").addClass("hide");
         $(".icon-wrap").eq(idx).removeClass("hide");
     }
@@ -106,49 +97,4 @@ define([], function(){
             Tips.init();
         }
     }
-});
-
-$(function() {
-    // if _config.yml => jquery_ui: false
-    if (!$().tooltip) return;
-    if (navigator.userAgent.match(/(iPhone|iPad|Android|ios|PlayBook|Touch)/i)) return;
-    $("[title]").tooltip({
-        show: {
-            effect: 'blind',
-            delay: 250,
-            duration: 55,
-        }
-    })
-    $("#scroll").tooltip({
-        show: {
-            effect: 'clip',
-            delay: 600,
-            duration: 50,
-        }
-    })
-    $("#tocButton, #comments").tooltip({
-        show: {
-            delay: 1200,
-        }
-    })
-    $(".ds-replybox form").off("tooltip")
-    $("#post-nav-button").tooltip({
-        show: {
-            effect: 'clip',
-            delay: 280,
-            duration: 65,
-        }
-    })
-    $("#post-nav-button > a:nth-child(2)").tooltip({
-        show: {
-            delay: 1500,
-        }
-    })
-    $(".social").tooltip({
-        show: {
-            effect: 'scale',
-            delay: 350,
-            duration: 70,
-        }
-    })
 });

@@ -67,7 +67,7 @@ require([], function (){
                 $(".article-inner .fancy-ctn").fancybox();
             }
         });
-
+        
     }
     //是否开启动画
     if(yiliaConfig.animate === true){
@@ -79,68 +79,34 @@ require([], function (){
                 $(".js-avatar").addClass("show");
             }
         });
-
-      if(yiliaConfig.isHome === true) {
-        // 滚动条监听使用scrollreveal.js
-        // https://github.com/jlmakes/scrollreveal.js
-        // 使用cdn[//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js]
-        require([
-          '//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js'
-        ], function (ScrollReveal) {
-          // 更多animation:
-          // http://daneden.github.io/animate.css/
-          var animationNames = [
-            "pulse", "fadeIn","fadeInRight", "flipInX", "lightSpeedIn","rotateInUpLeft", "slideInUp","zoomIn",
-            ],
-            len = animationNames.length,
-            randomAnimationName = animationNames[Math.ceil(Math.random() * len) - 1];
-
-          // ie9 不支持css3 keyframe动画, safari不支持requestAnimationFrame, 不使用随机动画，切回原来的动画
-          if (!window.requestAnimationFrame) {
-              $('.body-wrap > article').css({opacity: 1});
-
-              if (navigator.userAgent.match(/Safari/i)) {
-                  function showArticle(){
-                      $(".article").each(function(){
-                          if( $(this).offset().top <= $(window).scrollTop()+$(window).height() && !($(this).hasClass('show')) ) {
-                              $(this).removeClass("hidden").addClass("show");
-                              $(this).addClass("is-hiddened");
-                          }else{
-                              if(!$(this).hasClass("is-hiddened")){
-                                  $(this).addClass("hidden");
-                              }
-                          }
-                      });
-                  }
-                  $(window).on('scroll', function(){
-                      showArticle();
-                  });
-                  showArticle();
-              }
-              return;
-          }
-          // document.body有些浏览器不支持监听scroll，所以使用默认的document.documentElement
-          ScrollReveal({
-            duration: 0,
-            afterReveal: function (domEl) {
-              // safari不支持requestAnimationFrame不支持document.documentElement的onscroll所以这里不会执行
-              // 初始状态设为opacity: 0, 动画效果更平滑一些(由于脚本加载是异步，页面元素渲染后在执行动画，感觉像是延时)
-              $(domEl).addClass('animated ' + randomAnimationName).css({opacity: 1});
+        
+        if(yiliaConfig.isHome === true){
+            //content
+            function showArticle(){
+                $(".article").each(function(){
+                    if( $(this).offset().top <= $(window).scrollTop()+$(window).height() && !($(this).hasClass('show')) ) {
+                        $(this).removeClass("hidden").addClass("show");
+                        $(this).addClass("is-hiddened");
+                    }else{
+                        if(!$(this).hasClass("is-hiddened")){
+                            $(this).addClass("hidden");
+                        }
+                    }
+                });
             }
-          }).reveal('.body-wrap > article');
-
-        });
-      } else {
-        $('.body-wrap > article').css({opacity: 1});
-      }
-
+            $(window).on('scroll', function(){
+                showArticle();
+            });
+            showArticle();
+        }
+        
     }
-
+    
     //是否新窗口打开链接
     if(yiliaConfig.open_in_new == true){
         $(".article a[href]").attr("target", "_blank")
     }
-    $(".archive-article-title, .github-widget a").attr("target", "_blank");
+    $(".archive-article-title").attr("target", "_blank");
 
     //随机颜色
     var colorList = ["#6da336", "#ff945c", "#66CC66", "#99CC99", "#CC6666", "#76becc", "#c99979", "#918597", "#4d4d4d"];
