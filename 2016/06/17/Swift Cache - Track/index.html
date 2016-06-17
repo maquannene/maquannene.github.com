@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Swift Cache - Track 实现笔记 | 马权讷讷</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="引言开始萌生出要写这个 Cache 念头的原因在于想要练习一下 Swift 这门语言，顺便实战 GCD 达到多线程安全 和思考 如何写一个易用的库。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。
+这个库没有用到什么高深的技巧，也没有特别复杂的算法，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift Cache - Track 实现笔记">
+<meta property="og:url" content="http://yoursite.com/2016/06/17/Swift Cache - Track/index.html">
+<meta property="og:site_name" content="马权讷讷">
+<meta property="og:description" content="引言开始萌生出要写这个 Cache 念头的原因在于想要练习一下 Swift 这门语言，顺便实战 GCD 达到多线程安全 和思考 如何写一个易用的库。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。
+这个库没有用到什么高深的技巧，也没有特别复杂的算法，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设">
+<meta property="og:image" content="http://ww2.sinaimg.cn/large/65312d9agw1f4x68eph0bj20q80iewg6.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/65312d9agw1f4x68gjqt9j20pg0iejt2.jpg">
+<meta property="og:image" content="http://ww3.sinaimg.cn/large/65312d9agw1f4yfxjo9rgj20p00ie3zp.jpg">
+<meta property="og:image" content="http://ww4.sinaimg.cn/large/65312d9agw1f4yfxlqtabj20po0iq3zq.jpg">
+<meta property="og:updated_time" content="2016-06-17T11:33:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Swift Cache - Track 实现笔记">
+<meta name="twitter:description" content="引言开始萌生出要写这个 Cache 念头的原因在于想要练习一下 Swift 这门语言，顺便实战 GCD 达到多线程安全 和思考 如何写一个易用的库。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。
+这个库没有用到什么高深的技巧，也没有特别复杂的算法，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="http://ww4.sinaimg.cn/mw690/65312d9ajw8ewxo6wt9e4j20yi0yin08.jpg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">马权讷讷</a></h1>
+        </hgroup>
+
+        
+                
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <li id="GitHub"><a class="GitHub" target="_blank" href="https://github.com/maquannene" title="GitHub"></a></li>
+                            
+                                <li id="新浪微博"><a class="新浪微博" target="_blank" href="http://weibo.com/1697721754" title="新浪微博"></a></li>
+                            
+                                <li id="Email"><a class="Email" target="_blank" href="mailto:maquan@wps.cn" title="Email"></a></li>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/博客/" style="font-size: 15px;">博客</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">看你大爷</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">马权讷讷</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img lazy-src="http://ww4.sinaimg.cn/mw690/65312d9ajw8ewxo6wt9e4j20yi0yin08.jpg" class="js-avatar">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">马权讷讷</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <li id="GitHub"><a class="GitHub" target="_blank" href="https://github.com/maquannene" title="GitHub"></a></li>
+                            
+                                <li id="新浪微博"><a class="新浪微博" target="_blank" href="http://weibo.com/1697721754" title="新浪微博"></a></li>
+                            
+                                <li id="Email"><a class="Email" target="_blank" href="mailto:maquan@wps.cn" title="Email"></a></li>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-Swift Cache - Track" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/06/17/Swift Cache - Track/" class="article-date">
+      <time datetime="2016-06-17T04:47:53.000Z" itemprop="datePublished">2016-06-17</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Swift Cache - Track 实现笔记
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/学习笔记/">学习笔记</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p><br></p>
+<h3 id="u5F15_u8A00"><a href="#u5F15_u8A00" class="headerlink" title="引言"></a>引言</h3><p>开始萌生出要写这个 <a href="https://github.com/maquannene/Track" target="_blank" rel="external"><strong>Cache</strong></a> 念头的原因在于想要练习一下 <code>Swift</code> 这门语言，顺便实战 <code>GCD 达到多线程安全</code> 和思考 <code>如何写一个易用的库</code>。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。</p>
+<p>这个库没有用到什么高深的技巧，也没有特别复杂的算法，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设计等，建议继续往下读。</p>
+<a id="more"></a>
+<h3 id="u52A8_u624B_u5199_u4E4B_u524D"><a href="#u52A8_u624B_u5199_u4E4B_u524D" class="headerlink" title="动手写之前"></a>动手写之前</h3><p>在开始写这个库之前，我已经拜读过 Objective-C 的一些 Cache 的源码，例如 Star 比较多的 <a href="https://github.com/tumblr/TMCache" target="_blank" rel="external">TMCache</a> 以及它的改良版 <a href="https://github.com/pinterest/PINCache" target="_blank" rel="external">PINCache</a>，以及功能不是那么强大的 EGOCache 和 SDImageCache，当然还有大名鼎鼎的 <a href="https://github.com/ibireme/YYCache" target="_blank" rel="external">YYCache</a>。相比之下 Swift 的质量高功能齐全库的就相对少一些，<a href="https://github.com/aschuch/AwesomeCache" target="_blank" rel="external">AwesomeCache</a> 算是 Star 相对多一些的库了，其他类似 Haneke 功能不在对比的范围内。</p>
+<p>我对几个功能齐全的库的同步读写做了一个大概的测试（这里没有将将任何一个 Swift 库加入对比中，因为确实没有找到功能比较齐全的库，比如 AwesomeCache 是没有区分 Memory 和 Disk 的，并且功能比较少。AwesomeCache 的 Memory 直接用的是 NSCache，所以我将 NSCache 加入了测试中）结果如下图：</p>
+<p>下图为 <code>MemoryCache</code> 对随机产生的不重复 key value 数组进行读写测试：</p>
+<p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4x68eph0bj20q80iewg6.jpg" width="300" height="200"><br><img src="http://ww1.sinaimg.cn/large/65312d9agw1f4x68gjqt9j20pg0iejt2.jpg" width="300" height="200"></p>
+<p>YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 没有这个功能，所以在次写入后的淘汰数据阶段要快于其他 Cache 的重排序淘汰。其中 TM 速度非常慢，原因在于 TM 的 GCD 调度策略存在很大的问题，会导致同步小数据读写性能都损耗在 GCD 的调度上。这里值得一说的是 NSCache 对随机 key value 的读写性能不错，尤其是读，但是一旦出现相似形数据，性能就会变得非常低。</p>
+<p>下图为 <code>DiskCache</code> 对随机产生的不重复 key value 数组进行读写测试：</p>
+<p><img src="http://ww3.sinaimg.cn/large/65312d9agw1f4yfxjo9rgj20p00ie3zp.jpg" width="300" height="200"><br><img src="http://ww4.sinaimg.cn/large/65312d9agw1f4yfxlqtabj20po0iq3zq.jpg" width="300" height="200"></p>
+<p>很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。</p>
+<h3 id="u5F00_u59CB_u52A8_u624B_u5199"><a href="#u5F00_u59CB_u52A8_u624B_u5199" class="headerlink" title="开始动手写"></a>开始动手写</h3><p>在动手之前，已经了解到了各个库的优劣，所以在写的时候，我尽量提取了一些优点融入了 Track 中，接下来会主要针对以下几点进行说明，某些点对缓存的性能起到了决定性的作用：</p>
+<h4 id="1-_u7EBF_u7A0B_u8C03_u5EA6"><a href="#1-_u7EBF_u7A0B_u8C03_u5EA6" class="headerlink" title="1.线程调度"></a>1.线程调度</h4><p>良好的线程调度，是高性能的一个重要保证，如果没有使用良好的线程调度，就会造成上图中 TMMemoryCache 那种结果。（下面都是针对同步操作的效率的讨论，异步操作讨论意义不大）</p>
+<p>因为 Cache 要保证多线程安全，那么就必须有一套好的线程调度，经过一些源码的研究，我发现大部分缓存采取的线程调度策略分为下面两种：</p>
+<p><strong>方式一：</strong> <code>并发队列 + barrier</code> + <code>信号量等待</code> 或 <code>串行队列</code> + <code>信号量等待</code></p>
+<ul>
+<li>同步操作方式：</li>
+</ul>
+<ul>
+<li>读：在<code>并发队列</code>或<code>串行队列</code>中同步进行读取</li>
+<li>写：如果操作队列为<code>串行队列</code>，则采用操作事物直接异步扔串行队列，之后最外层加<code>信号量等待</code>变同步，详细参考 TMDiskCache 的同步写操作。<br> 如果操作队列为<code>并发队列</code>，则采用操作事物先外包裹 barrier，保证原子互斥性， 然后异步扔进并发队列，之后最外层加<code>信号量等待</code>变同步，详细参考 TMMemoryCache 的 同步写操作；<br></li>
+</ul>
+<ul>
+<li>异步操作方式：async 操作队列执行 <br></li>
+</ul>
+<p>上述这种模型，如果使用的是<code>并发队列</code>，即 TMMemoryCache 的调度模型，最终能达到读取时支持大并发同步读，写入时用 barrier 保证了写入的原子性、并且和读操作之间的互斥性。</p>
+<p><code>并发队列</code> + <code>barrier</code> 亦或者直接使用 <code>串行队列</code> 看似是一个十分完美的解决方案，但是实际上隐藏着很大的弊端，因为往往使用者会忽略掉线程切换造成的性能损耗。千万不要小看这一点损耗，试着想一下，如果我们写入或者读取的数据非常小，那么就会造成实际写入或者读取的时间远小于线程切换的时间，最终得不偿失。试图想要用并发队列使同一时间尽可能多的执行任务，以提高效率，但实际却发现时间全部消耗在了线程切换上。</p>
+<p>同样的道理就是类似下面这种代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dispatch_apply(count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(size_t i) &#123; &#10;operation();&#10;&#125;&#10;&#10;//&#9;&#36825;&#37324;&#20351;&#29992; dispatch_apply &#24182;&#21457;&#25805;&#20316;&#65292;&#22914;&#36807; operation() &#24182;&#19981;&#26159;&#38750;&#24120;&#32791;&#26102;&#65292;&#19981;&#22914;&#30452;&#25509;&#20351;&#29992; for loop</span><br></pre></td></tr></table></figure>
+<p>总结一句话就是：如果发现实际的操作并不是非常耗时，就尽量不要用多线程去优化性能，否则大多数时间反而会消耗在线程切换上。</p>
+<p>除此使用这种模型，当大量并发的调用同步读写时，会造成死锁的问题。</p>
+<p><strong>方式二：</strong> <code>并发队列</code> + <code>锁</code></p>
+<ul>
+<li>同步操作方式：</li>
+</ul>
+<ul>
+<li>读：当前线程直接加锁读。</li>
+<li>写：当前线程直接加锁写。</li>
+</ul>
+<ul>
+<li>异步操作方式：</li>
+</ul>
+<ul>
+<li>读：异步到并发队列加锁读。</li>
+<li>写：异步到并发队列加锁写。</li>
+<li>其实就是异步到并发队列调用上然后调用同步读写。</li>
+</ul>
+<p>这种线程安全模型简单点说就是最终的读写操作都加高性能锁，保证每次最终的读写都互斥。相比于方式一，首先解决的问题就是同步操作的效率问题，由于都是在当前线程的直接进行读写操作，没有任何线程调度，所以省去了线程切换的开销，性能远远高于方式一。其次解决的问题是没有了死锁，即使大量并发调用同步读写，因为没有了方式一的信号量等待使异步变同步，并不会造成线程资源饱和导致无法解锁信号量导致死锁的问题。</p>
+<p>相比于方式一，方式二其实并不支持真正的并发同步读，因为最终读操作都是加锁的，所以每个读都互斥，而方式一是可以做到并发读。但是鉴于方式一的策略本身就有死锁的问题，而且这些可能不能提高效率的并发操作也是建立在有死锁的风险上，所以方案并不可取。</p>
+<p>Track 使用的方式二，<code>MemoryCache</code> <code>DiskCache</code> 文件的类是线程安全的，<code>LinkList</code> 中的类是非线程安全的。<code>MemoryCache</code> <code>DiskCache</code> 文件中在使用 <code>LinkList</code> 中的类时做了线程安全封装。</p>
+<h4 id="2-_u6700_u8FD1_u6700_u4E0D_u5E38_u4F7F_u7528_u6DD8_u6C70"><a href="#2-_u6700_u8FD1_u6700_u4E0D_u5E38_u4F7F_u7528_u6DD8_u6C70" class="headerlink" title="2.最近最不常使用淘汰"></a>2.最近最不常使用淘汰</h4><p>缓存的另一个功能是淘汰，每次设置数据完成后，都要对 count 和 cost 超出的部分进行移除，这两个淘汰功能所依据的条件是缓存对象的年龄，即 count 和 cost 每次从最老的数据开始移除。</p>
+<p>在我读过的上面几个库中，实现淘汰的就只有 TM PIN 和 YY，TM 和 PIN 只有 cost 淘汰，YY 支持 count 和 cost 淘汰，实现方式分为两种如下：</p>
+<p><strong>方式一：</strong>每次需要淘汰时重新排序，然后从最最老的数据开始移除</p>
+<p>TM 和 PIN 各自有一个记录每个存储对象 date 的字典，每次写入之后的淘汰都是基于对这个数组重新排序然后开始末尾移除。</p>
+<p>这样做的劣势很明显，就是每次都会重新进行排序，如果你在使用 PINMemoryCache 时，设置了 costLimit 属性，那么你会发现效率立刻从摩托变成了单车，只能用惨不忍睹来形容，并且随着存储对象数量增加，会变得越来越慢。</p>
+<p><strong>方式二：</strong>使用链表也存储一份对象模型的引用，用于排序淘汰</p>
+<p>链表数据结构的优势是在已知节点的前提下，插入、移动、和删除的时间复杂度都是O(1)，所以可以借助这个优势用实现 LRU。每次读取数据时，从字典中查询节点，然后在链表中将节点移到头部，写入数据后的淘汰就避免了重新根据年龄排序耗时的问题，直接从链表的末尾开始向前移除即可。</p>
+<p>YYMemoryCache 和 Track.MemoryCache 都采用了这种方式，稍微有点不同的是，YY 的 cost 淘汰是异步到主线程调用的，Track 的 cost 是当前线程直接调用，这里各自的利弊就不多做评价了，各有各的想法吧，<a href="https://github.com/ibireme/YYCache/issues/54" target="_blank" rel="external">具体讨论可以看这里</a>。另外一点是很值得学习的，YY 在 count 淘汰时，是可选异步 release，设置 <code>releaseAsynchronously</code> 即可，这里需要提醒的是，我在小对象写入性能测试时，发现如果设置了 countLimit，YYMemoryCache 的效率就有明显下降，Profile 显示原因在异步到其他线程的过程消耗了一些性能，所以存储对象都为小对象且有 countLimit 时，建议将 releaseAsynchronously 设置为 NO。</p>
+<h4 id="3-_u5BB9_u5668_u9009_u53D6_u53CA_u5BF9_u8C61_u5B58_u50A8_u6A21_u578B"><a href="#3-_u5BB9_u5668_u9009_u53D6_u53CA_u5BF9_u8C61_u5B58_u50A8_u6A21_u578B" class="headerlink" title="3.容器选取及对象存储模型"></a>3.容器选取及对象存储模型</h4><h5 id="u5BB9_u5668_u9009_u53D6"><a href="#u5BB9_u5668_u9009_u53D6" class="headerlink" title="容器选取"></a>容器选取</h5><p><strong>（1）Memory</strong></p>
+<p>Memory 存储容器大致有这几种：NSCache，NSMutableDic，CFMutableDic</p>
+<p>NSCache 和 Dic 的区别在于 NSCache 本身就是线程安全的，所以上层不再需要安全线程调度的保护，而 Dic 是非线程安全的。AwesomeCache 就是采用 NSCache 直接作为内存缓存，NSCache 的效率上面的统计图已经给出，这里就不多说了。我在写 Track 时，本身第一想法是用 Dictionary，但是发现它的效率没有 NSMutableDic 高，所以最终选取了 NSMutableDic 作为存储和查询容器，LinkedList 作为调整顺序的容器。</p>
+<p><strong>（2）Disk</strong></p>
+<p>毫无疑问，文件系统的效率远远小于数据库。由于对数据库并不是很了解，所以关于 Disk 部分就不做讨论了，可以去看 YY 的作者写的文章，里面对磁盘存储做了很好的讨论。</p>
+<h5 id="u5B58_u50A8_u6A21_u578B"><a href="#u5B58_u50A8_u6A21_u578B" class="headerlink" title="存储模型"></a>存储模型</h5><p>这里想说的其实就是 TM 和 PIN 存在的另外一个性能问题，TM 和 PIN 在写入 Memory 时，除了写入本身存储 object 的 dictionary，还另外有两个字典 dates 和 costs。看源码中，会发现每次写入 object 时，都会对这三个字典写入一遍，性能分析时，发现写入的时间基本被这三个操作平分，性能立刻下降一大截。</p>
+<p>Track 和 YY 则采用的是将 date 和 cost 都封装起来，每次写入或修改数据时，只用写或者读一次字典，这样性能就提升了很多。</p>
+<h4 id="4-__u8FFD_u6C42_u6027_u80FD_u614E_u7528_u95ED_u5305"><a href="#4-__u8FFD_u6C42_u6027_u80FD_u614E_u7528_u95ED_u5305" class="headerlink" title="4. 追求性能慎用闭包"></a>4. 追求性能慎用闭包</h4><p>我在刚开始写 Track 的同步操作时，发现每次保证线程安全都需要加信号量锁，这样每次的代码都是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lock()&#10;...&#10;unlock()</span><br></pre></td></tr></table></figure>
+<p>我觉得这样实在是太不优雅了，所以写了个这样的函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func threadSafe(handler: () -&#62; Void) &#123;&#10;lock()&#10;handler()&#10;unlock()&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>后期我在优化性能时，发现这简直就是一个性能杀手，最后还是老老实实的前后调用加解锁函数。</p>
+<h3 id="u529F_u80FD_u589E_u52A0"><a href="#u529F_u80FD_u589E_u52A0" class="headerlink" title="功能增加"></a>功能增加</h3><p>在写到 1.0 版本之后，我就在想，既然库是用 Swift 写的，如果没有一点 Swift 的功能，那岂不是等于抄袭别人写的代码然后翻译了一遍？</p>
+<h4 id="u652F_u6301_GeneratorType_u3001SequenceType"><a href="#u652F_u6301_GeneratorType_u3001SequenceType" class="headerlink" title="支持 GeneratorType、SequenceType"></a>支持 GeneratorType、SequenceType</h4><p>我给 Track 中底层的的 LinkedList 和 LRU 加入了 <code>GeneratorType</code> 和 <code>SequenceType</code> 接口，这样 Track 上层封装后也支持了线程安全的 <code>GeneratorType</code> 和 <code>SequenceType</code>。这样就 Track 的 Cache、Memory、DiskMemory 都支持了 <code>for ... in</code> <code>map</code> <code>flapmap</code> <code>filter</code> 等一系列方法，具体使用可以<a href="https://github.com/maquannene/Track" target="_blank" rel="external">看这里</a>。</p>
+<p>这里值得一说的是，Disk 的 Generator 有自己的 <code>FastGeneratorType</code>，这样使得 Cache 遍历时，只要 MemoryCache 能读出值，DiskCache 指针快速移动即可，效率并不会降低，而且数据衔结正确。</p>
+<h4 id="u652F_u6301_Subscrip"><a href="#u652F_u6301_Subscrip" class="headerlink" title="支持 Subscrip"></a>支持 Subscrip</h4><p>这个就不多说了，小功能，方便使用。</p>
+<h3 id="u5199_u5728_u6700_u540E"><a href="#u5199_u5728_u6700_u540E" class="headerlink" title="写在最后"></a>写在最后</h3><p>目前就功能和性能上来讲，Objective-C 的此类 Cache 库中，YYCache 绝对是最好的。Swift 中目前我还没有找同类功能较齐全的库，AwesomeCache 只拥有基本的功能，所以如果你在写 Swift 的项目，正巧需要一个 Cache，那么请使用 <a href="https://github.com/maquannene/Track" target="_blank" rel="external"><strong>Track</strong></a> 吧。</p>
+<p><a href="https://github.com/maquannene/Track" target="_blank" rel="external"><strong>Track</strong></a> 还是花了我一些心思去尽量写好它，包括前期调研、后期加功能以及优化等等，以后仍将继续维护。</p>
+<p>所以支持的话，就给点一下👍吧。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/06/17/Swift Cache - Track/">Swift Cache - Track 实现笔记</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 马权讷讷 的个人博客">马权讷讷</a></p>
+        <p><span>发布时间:</span>2016年06月17日 - 12时47分</p>
+        <p><span>最后更新:</span>2016年06月17日 - 19时33分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/06/17/Swift Cache - Track/" title="Swift Cache - Track 实现笔记">http://yoursite.com/2016/06/17/Swift Cache - Track/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/06/17/Swift Cache - Track/　　作者: 马权讷讷" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/02/23/Git-学习笔记/">
+                    Git 学习笔记
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#u5F15_u8A00"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#u52A8_u624B_u5199_u4E4B_u524D"><span class="toc-text">动手写之前</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#u5F00_u59CB_u52A8_u624B_u5199"><span class="toc-text">开始动手写</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-_u7EBF_u7A0B_u8C03_u5EA6"><span class="toc-text">1.线程调度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-_u6700_u8FD1_u6700_u4E0D_u5E38_u4F7F_u7528_u6DD8_u6C70"><span class="toc-text">2.最近最不常使用淘汰</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-_u5BB9_u5668_u9009_u53D6_u53CA_u5BF9_u8C61_u5B58_u50A8_u6A21_u578B"><span class="toc-text">3.容器选取及对象存储模型</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#u5BB9_u5668_u9009_u53D6"><span class="toc-text">容器选取</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#u5B58_u50A8_u6A21_u578B"><span class="toc-text">存储模型</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-__u8FFD_u6C42_u6027_u80FD_u614E_u7528_u95ED_u5305"><span class="toc-text">4. 追求性能慎用闭包</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#u529F_u80FD_u589E_u52A0"><span class="toc-text">功能增加</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#u652F_u6301_GeneratorType_u3001SequenceType"><span class="toc-text">支持 GeneratorType、SequenceType</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#u652F_u6301_Subscrip"><span class="toc-text">支持 Subscrip</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#u5199_u5728_u6700_u540E"><span class="toc-text">写在最后</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+    
+        <section id="comments">
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'maquannene'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/02/23/Git-学习笔记/" title="下一篇: Git 学习笔记">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/06/17/Swift Cache - Track/">Swift Cache - Track 实现笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/Git-学习笔记/">Git 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/iOS-中-APP-回到前台通知的选择/">iOS 中 APP 回到前台通知的选择</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/08/博客改用 hexo 托管到 github 爬坑之旅/">博客改用 hexo 托管到 github 爬坑之旅</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/05/2016-01-05-cong-self-manangershuo-kai-qu/">从 Self-Mananger 说开去</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/20/2015-11-20-the-resolution-of-block-nil-in-mrc/"> MRC 下使用 Block 中的对象被释放，野指针的处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/11/20/2015-11-20-xin-bo-ke-da-jian-bi-ji/">基于 Octopress 新博客搭建笔记 - Mac 端</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+
+    
+        <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+        <script>
+            var yiliaConfig = {
+            fancybox: true,
+            mathjax: true,
+            animate: true,
+            isHome: false,
+            isPost: true,
+            isArchive: false,
+            isTag: false,
+            isCategory: false,
+            open_in_new: false
+            }
+        </script>
+        
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 马权讷讷
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的静态博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减双栏 Hexo 博客主题">Yelee</a> by MOxFIVE
+            </div>
+        </div>
+        <div class="visit">
+            <span id="busuanzi_container_site_pv" style='display:none'>
+                <span id="site-visit" >本站到访数: 
+                    <span id="busuanzi_value_site_uv"></span>
+                </span>
+            </span>
+            <span id="busuanzi_container_page_pv" style='display:none'>
+                <span id="page-visit">, 本页阅读量: 
+                    <span id="busuanzi_value_page_pv"></span>
+                </span>
+            </span>
+        </div>
+    </div>
+</footer>
+    </div>
+    
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
