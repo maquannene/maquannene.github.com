@@ -1,0 +1,136 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="description"><meta name="viewport" content="width=device-width, initial-scale=1"><title>马权讷讷</title><link rel="short icon" href="/favicon.ico"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/fonts/iconfont/iconfont.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,600|Roboto Mono"></head><body><div id="main"><header><a href="/." class="logo">马权讷讷</a><ul class="nav"><li class="nav-link"><a href="/" target="_self">首页</a></li><li class="nav-link"><a href="/archives/" target="_self">归档</a></li><li class="nav-link"><a href="/tags/" target="_self">标签</a></li><li class="nav-link"><a href="/about/" target="_self">关于</a></li></ul></header><section id="container"><article class="post"><h1 class="post-title">Git 学习笔记</h1><span class="post-time">Jun 20, 2016</span><div class="post-content"><p><br></p>
+<h3 id="u4E00-Git__u7684_u4EA7_u751F"><a href="#u4E00-Git__u7684_u4EA7_u751F" class="headerlink" title="一.Git 的产生"></a>一.Git 的产生</h3><p>作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物</p>
+<p><img src="http://img0.imgtn.bdimg.com/it/u=2504201466,3383861494&amp;fm=21&amp;gp=0.jpg" alt="Linus"></p>
+<p>Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。</p>
+<p>2002 以前 ，contributors 把源代码文件通过 diff 的方式发给 Linus，Linus 和 维护者 <code>手工方式</code> merge。</p>
+<a id="more"></a>
+<p>维护者受不了了，Linus 选择了 BitKeeper，很喜欢 BitKeeper.</p>
+<p>理查德・斯托尔曼（Richard Stallman）自由软件倡导者，精神领袖，GNU计划创造者</p>
+<p><img src="https://pic4.zhimg.com/2a980372a1e5aa27334e128fba5d556f_b.jpg" alt="RS"></p>
+<p><img src="https://ss1.baidu.com/70cFfyinKgQFm2e88IuM_a/forum/pic/item/adaf2edda3cc7cd9684f8ce83e01213fb80e91a5.jpg" alt="xx"></p>
+<p>并且有人开始对 BitKeeper 逆向，破解，BitKeeper 收回了 Linus 的免费使用权。</p>
+<p>不得不要写一个自己的版本控制系统：</p>
+<ul>
+<li>1.速度优势，有能力高效管理类似 Linux 内核一样的超大规模项目（速度和数据量）</li>
+<li>2.对非线性开发模式的强力支持（允许上千个并行开发的分支）</li>
+<li>3.完全分布式</li>
+<li>4.简单易用的设计，bullshit</li>
+</ul>
+<p>Linus 不到两周时间， C 写了一个分布式版本控制系统，1300 行左右，之后靠 cherry-pickontributors 去壮大。</p>
+<p><strong>身世评价:</strong></p>
+<p>亲爹：Linus <br><br>干爹：世界各地 contributors <br><br>外表：Source Tree, TortoiseGit 等等等 <br><br>内涵：<a href="http://pic002.cnblogs.com/img/1-2-3/201007/2010072023345292.png" target="_blank" rel="external">这里</a></p>
+<p><br></p>
+<h3 id="u4E8C-__u96C6_u4E2D_u5F0F__u4E0E__u5206_u5E03_u5F0F"><a href="#u4E8C-__u96C6_u4E2D_u5F0F__u4E0E__u5206_u5E03_u5F0F" class="headerlink" title="二. 集中式 与 分布式"></a>二. 集中式 与 分布式</h3><p>集中化的版本控制系统：SVN</p>
+<p><img src="http://git.oschina.net/progit/figures/18333fig0102-tn.png" alt="集中化的版本控制系统"></p>
+<p>单一的集中管理的服务器，保存所有文件的修订版本，协同者通过客户端连到这台服务器，查看提交记录或者进行提交。checkout 的只是某个版本的代码，没有任何版本信息记录。</p>
+<p>分布式版本控制系统：Git</p>
+<p><img src="http://git.oschina.net/progit/figures/18333fig0103-tn.png" alt="分布式版本控制系统"></p>
+<p>客户端并不只提取最新版本的文件快照，而是把代码仓库 <code>完整地镜像</code> 克隆（clone） 提取（fetch) 到本地</p>
+<ul>
+<li>1.分布式，去中心化 <br></li>
+<li>2.本地提交 <br><ul>
+<li>断网提交 <br></li>
+<li>小步提交，颗粒化，跟踪代码时，更加细腻 <br></li>
+<li>不用 sever，也可以进行版本控制 <br></li>
+</ul>
+</li>
+<li>3.高速度，所以 commit，checkout 变得飞快 <br></li>
+</ul>
+<p><br></p>
+<h3 id="u4E09-_Git__u7ED3_u6784_u6A21_u578B"><a href="#u4E09-_Git__u7ED3_u6784_u6A21_u578B" class="headerlink" title="三. Git 结构模型"></a>三. Git 结构模型</h3><p>为什么要理解 Git 结构模型？<br></p>
+<ul>
+<li>我 tmd 在哪？</li>
+<li>我 tmd 的代码呢? </li>
+<li>屏幕上的提示信息到底是 tmd 让我干嘛?</li>
+</ul>
+<p><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015120901.png" alt="四个区"></p>
+<p><strong>两区两库：</strong></p>
+<ul>
+<li>Workspace：工作区，就是你在电脑里能看到的目录 <br></li>
+<li>Index / Stage：暂存区，在暂存区的东西，才能 commit 到 Repository <br></li>
+<li>Repository：本地仓库<br></li>
+<li>Remote：远程仓库<br></li>
+</ul>
+<p><strong>六指令：</strong></p>
+<ul>
+<li>add：增加 <br></li>
+<li>commit：提交 <br></li>
+<li>push：推送 <br></li>
+<li>fetch：拉取 <br></li>
+<li>checkout：检出 <br></li>
+<li>pull：fetch + merge <br></li>
+</ul>
+<p><br></p>
+<h3 id="u56DB-_Git__u547D_u4EE4_u8BB2_u89E3"><a href="#u56DB-_Git__u547D_u4EE4_u8BB2_u89E3" class="headerlink" title="四. Git 命令讲解"></a>四. Git 命令讲解</h3><h4 id="1-init_clone"><a href="#1-init_clone" class="headerlink" title="1.init clone"></a>1.init clone</h4><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//初始化 git</span></span><br><span class="line">git init 	</span><br><span class="line"><span class="comment">//从服务器 clone repo，</span></span><br><span class="line">git clone</span><br></pre></td></tr></table></figure>
+<h4 id="2-_u914D_u7F6E_Git"><a href="#2-_u914D_u7F6E_Git" class="headerlink" title="2.配置 Git"></a>2.配置 Git</h4><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//查看配置</span></span><br><span class="line">git config --global --list</span><br><span class="line"><span class="comment">//编辑配置</span></span><br><span class="line">git config --global --eidt</span><br><span class="line">	</span><br><span class="line"><span class="comment">//设置提交人</span></span><br><span class="line">git config --global user<span class="variable">.name</span> <span class="string">"John Doe"</span></span><br><span class="line"><span class="comment">//设置邮件</span></span><br><span class="line">git config --global user<span class="variable">.email</span> johndoe@example<span class="variable">.com</span></span><br><span class="line"><span class="comment">//设置编辑器</span></span><br><span class="line">git config --global core<span class="variable">.editor</span> emacs</span><br></pre></td></tr></table></figure>
+<h4 id="3-add_2C_stage"><a href="#3-add_2C_stage" class="headerlink" title="3.add, stage"></a>3.add, stage</h4><p>从<code>工作区</code>选取一些代码快照，加入到<code>暂存区</code>，即将要<code>commit</code>的内容</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//将 &lt;path&gt; 放到 暂存区</span></span><br><span class="line">git add &lt;path&gt;</span><br><span class="line"><span class="comment">//将 改动的跟踪文件 放到暂存区，但是不包括 新增的 </span></span><br><span class="line">git add -u stages </span><br><span class="line"><span class="comment">//将 所有 放到暂存区</span></span><br><span class="line">git add .</span><br></pre></td></tr></table></figure>
+<ul>
+<li>提问：为什么会有<code>暂存区</code>这个概念？</li>
+<li>快照？</li>
+</ul>
+<h4 id="4-_u6682_u5B58_stash"><a href="#4-_u6682_u5B58_stash" class="headerlink" title="4.暂存 stash"></a>4.暂存 stash</h4><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//暂存当前工作区的变动</span></span><br><span class="line">git stash</span><br><span class="line"><span class="comment">//暂存当前工作区的变动，并命名为&lt;name&gt;</span></span><br><span class="line">git save <span class="string">"name"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//取出暂存，并删除</span></span><br><span class="line">git stash pop</span><br><span class="line"></span><br><span class="line"><span class="comment">//取出暂存，不删除</span></span><br><span class="line">git stash apply <span class="string">"name"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//列出暂存列表</span></span><br><span class="line">git stash list</span><br><span class="line"></span><br><span class="line"><span class="comment">//删除暂存</span></span><br><span class="line">git stash drop <span class="string">"name"</span></span><br></pre></td></tr></table></figure>
+<p><strong>高级用法</strong></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//操作片段</span></span><br><span class="line">git add -p</span><br><span class="line"></span><br><span class="line">y:	暂存此片</span><br><span class="line">n:	不暂存此片</span><br><span class="line">a:	暂存此片和剩余的片</span><br><span class="line">d:	不暂存和剩余的片</span><br><span class="line">?:	查看帮助</span><br><span class="line">q:	退出</span><br><span class="line">e:	手动编辑选择是否暂存</span><br><span class="line">s:	切片</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git add -i</span><br></pre></td></tr></table></figure>
+<h4 id="5-commit"><a href="#5-commit" class="headerlink" title="5.commit"></a>5.commit</h4><p>将<code>暂存区</code>的代码快照<code>提交</code>到<code>本地仓库</code></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git commit</span><br><span class="line"><span class="comment">//直接将 工作区 的所有文件提交到`本地仓库`</span></span><br><span class="line">git commit -a</span><br><span class="line"><span class="comment">//提交暂存区到仓库区</span></span><br><span class="line">git commit -m <span class="string">"log"</span></span><br></pre></td></tr></table></figure>
+<p><strong>高级用法</strong></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//纠正最后历史</span></span><br><span class="line">git commit --amend</span><br><span class="line"><span class="comment">//将 add 新的快照，追加最后到一次提交，并修改log</span></span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong>这样会更改历史</p>
+<h4 id="6-remote"><a href="#6-remote" class="headerlink" title="6.remote"></a>6.remote</h4><p>远端，即远程服务器</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">git remote</span><br><span class="line"></span><br><span class="line"><span class="comment">//添加远程主机。</span></span><br><span class="line">git remote add &lt;主机名&gt; &lt;服务器地址&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">//查看某个远程主机信息</span></span><br><span class="line">git remote show &lt;主机名&gt;</span><br><span class="line"></span><br><span class="line">git remote rm &lt;主机名&gt;</span><br><span class="line">git remote rename &lt;原主机名&gt; &lt;新主机名&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="7-push"><a href="#7-push" class="headerlink" title="7.push"></a>7.push</h4><p>将本地的分支信息推向远端</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push &lt;主机名&gt; &lt;本地分支名&gt;:&lt;远程分支名&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//将本地的主干推到远程主机，并建立追踪关系</span></span><br><span class="line">git push -u origin master:master</span><br><span class="line"></span><br><span class="line"><span class="comment">//推送当前分支到追踪分支</span></span><br><span class="line">git push</span><br><span class="line"></span><br><span class="line"><span class="comment">//强制覆盖推送 **改写历史***</span></span><br><span class="line">git push -f</span><br></pre></td></tr></table></figure>
+<h4 id="8-pull"><a href="#8-pull" class="headerlink" title="8.pull"></a>8.pull</h4><p>pull = fetch + merge<br>pull –rebase = fetch + rebase</p>
+<p>merge 优先尝试 fast-forward 模式</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git pull &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;</span><br><span class="line">git pull --rebase &lt;远程主机名&gt; &lt;远程分支名&gt;:&lt;本地分支名&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="9-fetch"><a href="#9-fetch" class="headerlink" title="9.fetch"></a>9.fetch</h4><p>将远程仓库新的提交的拉取到本地仓库</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git fetch</span><br><span class="line">git fetch origin master</span><br></pre></td></tr></table></figure>
+<h4 id="10-_u5408_u5E76_merge__u6F14_u5408_rebase"><a href="#10-_u5408_u5E76_merge__u6F14_u5408_rebase" class="headerlink" title="10.合并 merge 演合 rebase"></a>10.合并 merge 演合 rebase</h4><p><a href="http://pcottle.github.io/learnGitBranching/?NODEMO" target="_blank" rel="external">LearnGit</a></p>
+<p>把一个分支中的修改整合到另一个分支的办法有两种：<code>merge</code> 和 <code>rebase</code></p>
+<h5 id="a-_u5408_u5E76_merge"><a href="#a-_u5408_u5E76_merge" class="headerlink" title="a.合并 merge"></a>a.合并 merge</h5><p>把指定分支 branchX 合并到当前分支，如果不进行 fast-forward 模式，就会产生新的提交点。<br><br>若有冲突发生时，新的提交点为解决冲突记录。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git merge origin branchX</span><br></pre></td></tr></table></figure>
+<p>合并前<br><br><img src="http://git.oschina.net/progit/figures/18333fig0327-tn.png" alt="合并前"></p>
+<p>合并后<br><br><img src="http://git.oschina.net/progit/figures/18333fig0328-tn.png" alt="合并后"></p>
+<p><strong>fast-forward 模式</strong></p>
+<p><img src="http://nvie.com/img/merge-without-ff@2x.png" alt="fast-foward"></p>
+<h5 id="b-_u6F14_u5408_rebase"><a href="#b-_u6F14_u5408_rebase" class="headerlink" title="b.演合 rebase"></a>b.演合 rebase</h5><p>将当前分支和 branchX 产生分歧的 commit 点，重新在 branchX 演一遍。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git rebase branchX</span><br></pre></td></tr></table></figure>
+<p>演合之前<br><br><img src="http://git.oschina.net/progit/figures/18333fig0327-tn.png" alt="演合之前"></p>
+<p>演合之后<br><br><img src="http://git.oschina.net/progit/figures/18333fig0329-tn.png" alt="演合之后"></p>
+<p>注意：永远不要对已经推送到远程仓库的分支进行演合，否则再次推送时会产生冲突。永远不要改变历史。</p>
+<p>神奇的演合：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git rebase --onto branchA branchB branchC</span><br></pre></td></tr></table></figure>
+<h5 id="c-merge__u548C_rebase__u7684_u53D6_u820D"><a href="#c-merge__u548C_rebase__u7684_u53D6_u820D" class="headerlink" title="c.merge 和 rebase 的取舍"></a>c.merge 和 rebase 的取舍</h5><p>rebase: 保证了提交点的干净有序。<br><br>merge: 更加详细了记录了开发路线。</p>
+<h4 id="10-_u540E_u6094_u836F_reset_revert_reflog"><a href="#10-_u540E_u6094_u836F_reset_revert_reflog" class="headerlink" title="10.后悔药 reset revert reflog"></a>10.后悔药 reset revert reflog</h4><h5 id="1-reset"><a href="#1-reset" class="headerlink" title="1.reset"></a>1.reset</h5><p>类似 SVN 的revert，将当前分支提交重置回某个提交点。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset [commit]</span><br><span class="line"><span class="comment">//--soft --mixed --hard</span></span><br></pre></td></tr></table></figure>
+<p>注意：不要对已经在远程服务器的 commit 进行 reset</p>
+<h5 id="2-revert"><a href="#2-revert" class="headerlink" title="2.revert"></a>2.revert</h5><p>对某一次提交做一次反向操作，并且提交创建一个新提交</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git revert [commit]</span><br></pre></td></tr></table></figure>
+<h5 id="3-reflog"><a href="#3-reflog" class="headerlink" title="3.reflog"></a>3.reflog</h5><p>列出 HEAD 经历过的记录，神器~</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reflog</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="u4E94-_Git__u5F00_u53D1_u6A21_u578B_u2013GitFlow"><a href="#u4E94-_Git__u5F00_u53D1_u6A21_u578B_u2013GitFlow" class="headerlink" title="五. Git 开发模型–GitFlow"></a>五. Git 开发模型–GitFlow</h3><h4 id="1-branch"><a href="#1-branch" class="headerlink" title="1.branch"></a>1.branch</h4><p>Git 分支不同于 SVN，不是对文件拷贝的副本，而是快照，使用起来非常轻量级。这使得开发中对分支的 new，merge，delete 变得非常廉价，更好的支持并发型开发。开分支，就是新建一个指针而已。</p>
+<p>分支的查看</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//列出所有本地分支</span></span><br><span class="line">git branch</span><br><span class="line"></span><br><span class="line"><span class="comment">//列出所有远程分支</span></span><br><span class="line">git branch -r</span><br><span class="line"></span><br><span class="line"><span class="comment">//列出所有分支</span></span><br><span class="line">git branch -a</span><br></pre></td></tr></table></figure>
+<p>分支的新建</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//新建分支 branchName</span></span><br><span class="line">git branch [branchName]</span><br><span class="line"></span><br><span class="line"><span class="comment">//新建分支 branchName 并且切换</span></span><br><span class="line">git checkout -b [branchName]</span><br><span class="line"></span><br><span class="line"><span class="comment">//从一个 commit 点新建一条分支 branchName</span></span><br><span class="line">git branch [branchName] [commit]</span><br></pre></td></tr></table></figure>
+<p>分支的切换 checkout 功能</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//切换分支</span></span><br><span class="line">git checkout [branchName]</span><br><span class="line"><span class="comment">//移动 head</span></span><br><span class="line">git checkout [commit]</span><br><span class="line"><span class="comment">//将追踪的文件重置为上一次 commit 的内容</span></span><br><span class="line">git checkout &lt;fileName&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="2-GitFlow"><a href="#2-GitFlow" class="headerlink" title="2.GitFlow"></a>2.GitFlow</h4><p><img src="http://nvie.com/img/git-model@2x.png" alt="GitFlow"></p>
+<p><br></p>
+<h3 id="u516D-__u8F85_u52A9_u5229_u5668"><a href="#u516D-__u8F85_u52A9_u5229_u5668" class="headerlink" title="六. 辅助利器"></a>六. 辅助利器</h3><h4 id="1-Zsh"><a href="#1-Zsh" class="headerlink" title="1.Zsh"></a>1.<a href="https://github.com/robbyrussell/oh-my-zsh" target="_blank" rel="external">Zsh</a></h4><h4 id="2-GitDiff"><a href="#2-GitDiff" class="headerlink" title="2.GitDiff"></a>2.<a href="https://github.com/johnno1962/GitDiff" target="_blank" rel="external">GitDiff</a></h4><p><br></p>
+<h3 id="u4E03-__u6269_u5C55"><a href="#u4E03-__u6269_u5C55" class="headerlink" title="七. 扩展"></a>七. 扩展</h3><h4 id="1-git_config"><a href="#1-git_config" class="headerlink" title="1.git config"></a>1.git config</h4><h4 id="2-git_rebase_-i"><a href="#2-git_rebase_-i" class="headerlink" title="2.git rebase -i"></a>2.git rebase -i</h4><h4 id="3-cherry-pick"><a href="#3-cherry-pick" class="headerlink" title="3.cherry-pick"></a>3.cherry-pick</h4><p>将一个提交点重新应用到当前分支，此时是一个新的提交号</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git cherry-pick [commit]</span><br></pre></td></tr></table></figure>
+<p>注意：永远不要 cherry-pick 已推送到远端的 commit，否则再次推送时会产生冲突。</p>
+<h4 id="4-gitignore"><a href="#4-gitignore" class="headerlink" title="4..gitignore"></a>4..gitignore</h4><h4 id="5-alias"><a href="#5-alias" class="headerlink" title="5.alias"></a>5.alias</h4><h4 id="6-ssh"><a href="#6-ssh" class="headerlink" title="6.ssh"></a>6.ssh</h4></div></article><div class="tags"><a href="/tags/Git/">Git</a></div><div class="paginator"><a href="/2016/06/17/Swift Cache - Track/" class="prev"><i class="fa fa-chevron-left"></i><span> 上一页</span></a><a href="/2016/02/19/iOS-中-APP-回到前台通知的选择/" class="next"><span>下一页</span><i class="fa fa-chevron-right"></i></a></div><section id="comments"><div id="disqus_thread"></div></section><script type="text/javascript">(function() {
+var d = document, s = d.createElement('script');
+
+s.src = '//maquannene.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script></section><footer><div class="copyright"><p><span class="heart"><i class="fa fa-heart"></i></span><span class="author">马权讷讷</span></p><p class="theme">Theme by <a href="https://github.com/ahonn/hexo-theme-even"> Even</a></p></div><label id="back2top"><i class="fa fa-chevron-up"></i></label></footer></div></body><script src="/js/back2top.js"></script></html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="description"><meta name="viewport" content="width=device-width, initial-scale=1"><title>马权讷讷</title><link rel="short icon" href="/favicon.ico"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/fonts/iconfont/iconfont.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,600|Roboto Mono"></head><body><div id="main"><header><a href="/." class="logo">马权讷讷</a><ul class="nav"><li class="nav-link"><a href="/" target="_self">首页</a></li><li class="nav-link"><a href="/archives/" target="_self">归档</a></li><li class="nav-link"><a href="/tags/" target="_self">标签</a></li><li class="nav-link"><a href="/about/" target="_self">关于</a></li></ul></header><section id="container"><article class="post"><h1 class="post-title">Swift Cache - Track 实现笔记</h1><span class="post-time">Jun 20, 2016</span><div class="post-content"><p><br></p>
+<h3 id="u5F15_u8A00"><a href="#u5F15_u8A00" class="headerlink" title="引言"></a>引言</h3><p>开始萌生出要写这个 <a href="https://github.com/maquannene/Track" target="_blank" rel="external"><strong>Cache</strong></a> 念头，是想要练习一下 <code>Swift</code> 这门语言，顺便实战 <code>GCD 达到多线程安全</code> 和思考 <code>如何写一个易用的库</code>。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。</p>
+<p>这个库没有用到特别高深的技巧，也没有特别复杂的算法，但是完成的过程让我学习到了很多东西，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设计等等，建议读下去。</p>
+<a id="more"></a>
+<h3 id="u52A8_u624B_u5199_u4E4B_u524D"><a href="#u52A8_u624B_u5199_u4E4B_u524D" class="headerlink" title="动手写之前"></a>动手写之前</h3><p>在开始写这个库之前，我已经拜读过 Objective-C 的一些 Cache 的源码，例如 Star 比较多的 <a href="https://github.com/tumblr/TMCache" target="_blank" rel="external">TMCache</a> 以及它的改良版 <a href="https://github.com/pinterest/PINCache" target="_blank" rel="external">PINCache</a>，以及功能不是那么强大的 EGOCache 和 SDImageCache，当然还有大名鼎鼎的 <a href="https://github.com/ibireme/YYCache" target="_blank" rel="external">YYCache</a>。相比之下 Swift 的此类库就相对少一些，<a href="https://github.com/aschuch/AwesomeCache" target="_blank" rel="external">AwesomeCache</a> 算是 Star 相对多一些的库了，其他类似 Haneke 功能不在对比的范围内。</p>
+<p>我对几个功能齐全的库的同步读写做了一个大概的测试（这里没有将任何一个 Swift 库加入对比中，因为确实没有找到功能比较齐全的库，比如 AwesomeCache 是没有区分 Memory 和 Disk 的，并且功能比较少。AwesomeCache 的 Memory 直接用的是 NSCache，所以我将 NSCache 加入了测试中）结果如下图：</p>
+<p>下图为 <code>MemoryCache</code> 对随机产生的不重复 key value 数组进行读写测试：</p>
+<p><img src="http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg" width="400" height="300"><br><img src="http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg" width="400" height="300"></p>
+<p>YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰功能，但并没有引入 LRU 算法，所以在写入后的淘汰数据阶段 YY 和 Track 要快于其他 Cache 的重排序淘汰。其中 TM 速度非常慢，原因在于 TM 的 GCD 调度策略存在很大的问题，会导致同步小数据读写性能都损耗在 GCD 的调度上。这里值得一说的是 NSCache 对随机 key value 的读写性能不错，尤其是读，但是一旦出现相似形数据，性能就会变得非常低。</p>
+<p>下图为 <code>DiskCache</code> 对随机产生的不重复 key value 数组进行读写测试：</p>
+<p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg" width="400" height="300"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg" width="400" height="300"></p>
+<p>很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。</p>
+<h3 id="u5F00_u59CB_u52A8_u624B_u5199"><a href="#u5F00_u59CB_u52A8_u624B_u5199" class="headerlink" title="开始动手写"></a>开始动手写</h3><p>在动手之前，已经了解到了各个库的优劣，所以在写的时候，我尽量提取了一些优点融入了 Track 中，接下来会主要针对以下几点进行说明，某些点对缓存的性能起到了决定性的作用：</p>
+<h4 id="1-_u7EBF_u7A0B_u8C03_u5EA6"><a href="#1-_u7EBF_u7A0B_u8C03_u5EA6" class="headerlink" title="1.线程调度"></a>1.线程调度</h4><p>良好的线程调度，是高性能的一个重要保证，如果没有使用良好的线程调度，就会造成上图中 TMMemoryCache 那种结果。（下面都是针对同步操作的效率的讨论，异步操作讨论意义不大）</p>
+<p>因为 Cache 要保证多线程安全，那么就必须有一套好的线程调度，经过一些源码的研究，我发现大部分缓存采取的线程调度策略分为下面两种：</p>
+<p><strong>方式一：</strong> <code>并发队列 + barrier</code> + <code>信号量等待</code> 或 <code>串行队列</code> + <code>信号量等待</code></p>
+<ul>
+<li>同步操作方式：</li>
+</ul>
+<ul>
+<li>读：在<code>并发队列</code>或<code>串行队列</code>中同步进行读取</li>
+<li>写：如果写队列为<code>串行队列</code>，则写操作直接异步扔串行队列，之后最外层加<code>信号量等待锁</code>变同步，详细参考 TMDiskCache 的同步写操作。<br> 如果写队列为<code>并发队列</code>，则写操作先外包裹 barrier，保证原子互斥性， 然后异步扔进并发队列，之后最外层加<code>信号量等待锁</code>变同步，详细参考 TMMemoryCache 的 同步写操作；<br></li>
+</ul>
+<ul>
+<li>异步操作方式：async 到操作队列执行 <br></li>
+</ul>
+<p>上述这种模型，如果使用的是<code>并发队列</code>，即 TMMemoryCache 的调度模型，最终能达到读取时支持大并发同步读，写入时用 barrier 保证了写入的原子性、并且和读操作之间的互斥性。</p>
+<p><code>并发队列</code> + <code>barrier</code> 亦或者直接使用 <code>串行队列</code> 看似是一个十分完美的解决方案，但是实际上隐藏着很大的弊端，因为往往使用者会忽略掉线程切换造成的性能损耗。千万不要小看这一点损耗，试着想一下，如果我们写入或者读取的数据非常小，那么就会造成实际写入或者读取的时间远小于线程切换的时间，最终得不偿失。试图想要用并发队列使同一时间尽可能多的执行任务，以提高效率，但实际却发现时间全部消耗在了线程切换上。</p>
+<p>同样的道理就是类似下面这种代码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dispatch_apply(count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(size_t i) &#123; &#10;operation();&#10;&#125;&#10;&#10;//&#9;&#36825;&#37324;&#20351;&#29992; dispatch_apply &#25918;&#20837;&#24182;&#21457;&#38431;&#21015;&#25191;&#34892;&#65292;&#22914;&#36807; operation() &#24182;&#19981;&#26159;&#38750;&#24120;&#32791;&#26102;&#65292;&#19981;&#22914;&#30452;&#25509;&#20351;&#29992; for loop</span><br></pre></td></tr></table></figure>
+<p>总结一句话就是：如果发现实际的操作并不是非常耗时，就尽量不要用多线程去优化性能，否则大多数时间反而会消耗在线程切换上。</p>
+<p>除此之外，使用这种模型时如果采用的是<code>并发队列 + barrier</code> + <code>信号量等待</code>，当大量并发的调用同步读写时，会造成死锁的问题。</p>
+<p><strong>方式二：</strong> <code>并发队列</code> + <code>锁</code></p>
+<ul>
+<li>同步操作方式：</li>
+</ul>
+<ul>
+<li>读：当前线程直接加锁读。</li>
+<li>写：当前线程直接加锁写。</li>
+</ul>
+<ul>
+<li>异步操作方式：</li>
+</ul>
+<ul>
+<li>读：异步到并发队列加锁读。</li>
+<li>写：异步到并发队列加锁写。</li>
+<li>其实就是异步到并发队列调用上然后调用同步读写。</li>
+</ul>
+<p>这种线程安全模型简单点说就是最终的读写操作都加高性能锁，保证每次最终的读写都互斥。相比于方式一，首先解决的问题就是同步操作的效率问题，因为都是在当前线程直接进行读写操作，没有任何线程调度，所以省去了线程切换的开销，同步读写性能远远高于方式一。其次解决的问题是没有了死锁，即使大量并发调用同步读写时，因为没有了方式一的信号量等待使异步变同步，并不会造成线程资源饱和导致无法解锁信号量导致死锁的问题。</p>
+<p>相比于方式一，方式二其实并不支持真正的并发同步读，因为最终读操作都是加锁的，所以每个读都互斥，而方式一是可以做到并发读。但是鉴于方式一的策略本身就有死锁的问题，并且这些并不能提高效率的并发操作也是建立在有死锁的风险上，所以方案并不可取。</p>
+<p>Track 使用方式二，<code>MemoryCache</code> <code>DiskCache</code> 文件的类是线程安全的，<code>LinkList</code> 中的类是非线程安全的。<code>MemoryCache</code> <code>DiskCache</code> 文件中在使用 <code>LinkList</code> 中的类时做了线程安全封装。</p>
+<h4 id="2-_u6700_u8FD1_u6700_u4E0D_u5E38_u4F7F_u7528_u6DD8_u6C70"><a href="#2-_u6700_u8FD1_u6700_u4E0D_u5E38_u4F7F_u7528_u6DD8_u6C70" class="headerlink" title="2.最近最不常使用淘汰"></a>2.最近最不常使用淘汰</h4><p>缓存的另一个功能是淘汰，每次设置数据完成后，都要对 count（总数） 和 cost（总内存占有量） 超出的部分进行移除，这两个淘汰功能所依据的条件是缓存对象的年龄，即 count 和 cost 淘汰每次从最老的数据开始移除。所以如何对对象年龄进行排序，也是决定性能好坏的因素之一。</p>
+<p>在我读过的上面几个库中，实现淘汰的就只有 TM PIN 和 YY，TM 和 PIN 有 cost 和 date 淘汰，YY 和 Track 支持 count、cost、date 淘汰，实现方式分为两种如下：</p>
+<p><strong>方式一：</strong>每次需要淘汰时重新排序，然后从最最老的数据开始移除</p>
+<p>TM 和 PIN 各自有一个记录每个存储对象 date 的字典，每次写入之后的淘汰都是基于对这个数组重新排序然后开始末尾移除。</p>
+<p>这样做的劣势很明显，就是每次都会重新进行排序，如果你在使用 PINMemoryCache 时，设置了 costLimit 属性，那么你会发现效率立刻从摩托变成了单车，只能用惨不忍睹来形容，并且随着存储对象数量增加，会变得越来越慢。</p>
+<p><strong>方式二：</strong>使用链表也存储一份对象模型的引用，用于排序淘汰</p>
+<p>链表数据结构的优势是在已知节点的前提下，插入、移动、和删除的时间复杂度都是O(1)，所以可以借助这个优势用实现 LRU。每次读取数据时，从字典中查询节点，然后在链表中将节点移到头部，写入数据后的淘汰就避免了重新根据年龄排序耗时的问题，直接从链表的末尾开始向前移除即可。</p>
+<p>YYMemoryCache 和 Track.MemoryCache 都采用了这种方式，稍微有点不同的是，YY 的 cost 淘汰是异步到主线程调用的，Track 的 cost 是当前线程直接调用，这里各自的利弊就不多做评价了，各有各的想法吧，<a href="https://github.com/ibireme/YYCache/issues/54" target="_blank" rel="external">具体讨论可以看这里</a>。另外一点是很值得学习的，YY 在 count 淘汰时，是可选异步 release，设置 <code>releaseAsynchronously</code> 即可，这里需要提醒的是，我在小对象写入性能测试时，发现如果设置了 countLimit，YYMemoryCache 的效率就有明显下降，Profile 显示原因在异步到其他线程的过程消耗了一些性能，所以存储对象都为小对象且有 countLimit 时，建议将 releaseAsynchronously 设置为 NO。</p>
+<h4 id="3-_u5BB9_u5668_u9009_u53D6_u53CA_u5BF9_u8C61_u5B58_u50A8_u6A21_u578B"><a href="#3-_u5BB9_u5668_u9009_u53D6_u53CA_u5BF9_u8C61_u5B58_u50A8_u6A21_u578B" class="headerlink" title="3.容器选取及对象存储模型"></a>3.容器选取及对象存储模型</h4><h5 id="u5BB9_u5668_u9009_u53D6"><a href="#u5BB9_u5668_u9009_u53D6" class="headerlink" title="容器选取"></a>容器选取</h5><p><strong>（1）Memory</strong></p>
+<p>Memory 存储容器大致有这几种：NSCache，NSMutableDic，CFMutableDic</p>
+<p>NSCache 和 Dic 的区别在于 NSCache 本身就是线程安全的，所以上层不再需要安全线程调度的保护，而 Dic 是非线程安全的。AwesomeCache 就是采用 NSCache 直接作为内存缓存，NSCache 的效率上面的统计图已经给出，这里就不多说了。我在写 Track 时，本身第一想法是用 Dictionary，但是发现它的效率没有 NSMutableDic 高，所以最终选取了 NSMutableDic 作为存储和查询容器，LinkedList 作为调整顺序的容器。</p>
+<p><strong>（2）Disk</strong></p>
+<p>毫无疑问，文件系统的效率远远小于数据库。由于对数据库并不是很了解，所以关于 Disk 部分就不做讨论了，可以去看 YY 的作者写的文章，里面对磁盘存储做了很好的讨论。</p>
+<h5 id="u5B58_u50A8_u6A21_u578B"><a href="#u5B58_u50A8_u6A21_u578B" class="headerlink" title="存储模型"></a>存储模型</h5><p>这里想说的其实就是 TM 和 PIN 存在的另外一个性能问题，TM 和 PIN 在写入 Memory 时，除了写入本身存储 object 的 dictionary，还另外有两个字典 dates 和 costs。看源码中，会发现每次写入 object 时，都会对这三个字典写入一遍，性能分析时，发现写入的时间基本被这三个操作平分，性能立刻下降一大截。</p>
+<p>Track 和 YY 则采用的是将 date 和 cost 都封装起来，每次写入或修改数据时，只用写或者读一次字典，这样性能就提升了很多。</p>
+<h4 id="4-__u8FFD_u6C42_u6027_u80FD_u614E_u7528_u95ED_u5305"><a href="#4-__u8FFD_u6C42_u6027_u80FD_u614E_u7528_u95ED_u5305" class="headerlink" title="4. 追求性能慎用闭包"></a>4. 追求性能慎用闭包</h4><p>我在刚开始写 Track 的同步操作时，发现每次保证线程安全都需要加信号量锁，所以每次的代码都是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lock()&#10;...&#10;unlock()</span><br></pre></td></tr></table></figure>
+<p>我觉得这样实在是太不优雅了，所以写了个这样的函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">func threadSafe(handler: () -&#62; Void) &#123;&#10;lock()&#10;handler()&#10;unlock()&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>后期我在优化性能时，发现闭包简直就是一个性能杀手，最后还是老老实实的前后调用加解锁函数。</p>
+<h3 id="u529F_u80FD_u589E_u52A0"><a href="#u529F_u80FD_u589E_u52A0" class="headerlink" title="功能增加"></a>功能增加</h3><p>在写到 1.0 版本之后，我就在想，既然库是用 Swift 写的，如果没有一点 Swift 的功能，那岂不是等于抄袭别人写的代码然后翻译了一遍？所以就加入了些 Swift 的东西：</p>
+<h4 id="u652F_u6301_GeneratorType_u3001SequenceType"><a href="#u652F_u6301_GeneratorType_u3001SequenceType" class="headerlink" title="支持 GeneratorType、SequenceType"></a>支持 GeneratorType、SequenceType</h4><p>我给 Track 中底层的的 LinkedList 和 LRU 实现了 <code>GeneratorType</code> 和 <code>SequenceType</code> 接口，这样 Track 上层封装后也支持了线程安全的 <code>GeneratorType</code> 和 <code>SequenceType</code>。这样就 Track 的 Cache、Memory、DiskMemory 都支持了 <code>for ... in</code> <code>map</code> <code>flapmap</code> <code>filter</code> 等一系列方法，功能更加强大啦。</p>
+<p>这里值得一说的是，Disk 的 Generator 有实现的是 <code>FastGeneratorType</code>，这样使得 Cache 遍历时，只要 MemoryCache 能读出值，DiskCache 指针快速移动即可，效率并不会降低，当 MemoryCache 读不到内容时，便开始读 DiskCache，并且数据衔结正确。</p>
+<h4 id="u652F_u6301_Subscript"><a href="#u652F_u6301_Subscript" class="headerlink" title="支持 Subscript"></a>支持 Subscript</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> cache: <span class="type">Cache</span> = <span class="type">Cache</span>.shareInstance</span><br><span class="line">cache[<span class="string">"key"</span>] = <span class="string">"value"</span></span><br><span class="line"><span class="keyword">let</span> <span class="number">_</span> = cache[<span class="string">"key"</span>]</span><br></pre></td></tr></table></figure>
+<p>读写操作更方便。</p>
+<h3 id="u5199_u5728_u6700_u540E"><a href="#u5199_u5728_u6700_u540E" class="headerlink" title="写在最后"></a>写在最后</h3><p>目前就功能和性能上来讲，Objective-C 的此类 Cache 库中，YYCache 绝对是最好的。Swift 中目前我还没有找同类功能较齐全的库，AwesomeCache 只拥有基本的功能，所以如果你在写 Swift 的项目，正巧需要一个 Cache，那么请使用 <a href="https://github.com/maquannene/Track" target="_blank" rel="external"><strong>Track</strong></a> 吧。</p>
+<p><a href="https://github.com/maquannene/Track" target="_blank" rel="external"><strong>Track</strong></a> 还是花了我一些心思去尽量写好它，包括前期调研、后期加功能以及优化等等，以后仍将继续维护。</p>
+<p>所以支持的话，就👍一下吧。</p>
+</div></article><div class="tags"><a href="/tags/Swift/">Swift</a></div><div class="paginator"><a href="/2016/02/23/Git-学习笔记/" class="next"><span>下一页</span><i class="fa fa-chevron-right"></i></a></div><section id="comments"><div id="disqus_thread"></div></section><script type="text/javascript">(function() {
+var d = document, s = d.createElement('script');
+
+s.src = '//maquannene.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script></section><footer><div class="copyright"><p><span class="heart"><i class="fa fa-heart"></i></span><span class="author">马权讷讷</span></p><p class="theme">Theme by <a href="https://github.com/ahonn/hexo-theme-even"> Even</a></p></div><label id="back2top"><i class="fa fa-chevron-up"></i></label></footer></div></body><script src="/js/back2top.js"></script></html>
