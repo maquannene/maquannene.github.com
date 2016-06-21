@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-06-20T09:00:15.000Z</updated>
+  <updated>2016-06-20T12:31:42.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,10 +20,9 @@
     <link href="http://yoursite.com/2016/06/17/Swift%20Cache%20-%20Track/"/>
     <id>http://yoursite.com/2016/06/17/Swift Cache - Track/</id>
     <published>2016-06-17T04:47:53.000Z</published>
-    <updated>2016-06-20T09:00:15.000Z</updated>
+    <updated>2016-06-20T12:31:42.000Z</updated>
     
-    <content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
-&lt;h3 id=&quot;u5F15_u8A00&quot;&gt;&lt;a href=&quot;#u5F15_u8A00&quot; class=&quot;headerlink&quot; title=&quot;引言&quot;&gt;&lt;/a&gt;引言&lt;/h3&gt;&lt;p&gt;开始萌生出要写这个 &lt;a href=&quot;https://github.com/maquannene/Track&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;strong&gt;Cache&lt;/strong&gt;&lt;/a&gt; 念头，是想要练习一下 &lt;code&gt;Swift&lt;/code&gt; 这门语言，顺便实战 &lt;code&gt;GCD 达到多线程安全&lt;/code&gt; 和思考 &lt;code&gt;如何写一个易用的库&lt;/code&gt;。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。&lt;/p&gt;
+    <content type="html">&lt;h3 id=&quot;u5F15_u8A00&quot;&gt;&lt;a href=&quot;#u5F15_u8A00&quot; class=&quot;headerlink&quot; title=&quot;引言&quot;&gt;&lt;/a&gt;引言&lt;/h3&gt;&lt;p&gt;开始萌生出要写这个 &lt;a href=&quot;https://github.com/maquannene/Track&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;strong&gt;Cache&lt;/strong&gt;&lt;/a&gt; 念头，是想要练习一下 &lt;code&gt;Swift&lt;/code&gt; 这门语言，顺便实战 &lt;code&gt;GCD 达到多线程安全&lt;/code&gt; 和思考 &lt;code&gt;如何写一个易用的库&lt;/code&gt;。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。&lt;/p&gt;
 &lt;p&gt;这个库没有用到特别高深的技巧，也没有特别复杂的算法，但是完成的过程让我学习到了很多东西，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设计等等，建议读下去。&lt;/p&gt;
 &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
 &lt;h3 id=&quot;u52A8_u624B_u5199_u4E4B_u524D&quot;&gt;&lt;a href=&quot;#u52A8_u624B_u5199_u4E4B_u524D&quot; class=&quot;headerlink&quot; title=&quot;动手写之前&quot;&gt;&lt;/a&gt;动手写之前&lt;/h3&gt;&lt;p&gt;在开始写这个库之前，我已经拜读过 Objective-C 的一些 Cache 的源码，例如 Star 比较多的 &lt;a href=&quot;https://github.com/tumblr/TMCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;TMCache&lt;/a&gt; 以及它的改良版 &lt;a href=&quot;https://github.com/pinterest/PINCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;PINCache&lt;/a&gt;，以及功能不是那么强大的 EGOCache 和 SDImageCache，当然还有大名鼎鼎的 &lt;a href=&quot;https://github.com/ibireme/YYCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;YYCache&lt;/a&gt;。相比之下 Swift 的此类库就相对少一些，&lt;a href=&quot;https://github.com/aschuch/AwesomeCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;AwesomeCache&lt;/a&gt; 算是 Star 相对多一些的库了，其他类似 Haneke 功能不在对比的范围内。&lt;/p&gt;
@@ -105,8 +104,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h3 id=&quot;u5F15_u8A00&quot;&gt;&lt;a href=&quot;#u5F15_u8A00&quot; class=&quot;headerlink&quot; title=&quot;引言&quot;&gt;&lt;/a&gt;引言&lt;/h3&gt;&lt;p&gt;开始萌生出要写这个 &lt;a href=&quot;https://github.com/maquannene/Track&quot;&gt;&lt;strong&gt;Cache&lt;/strong&gt;&lt;/a&gt; 念头，是想要练习一下 &lt;code&gt;Swift&lt;/code&gt; 这门语言，顺便实战 &lt;code&gt;GCD 达到多线程安全&lt;/code&gt; 和思考 &lt;code&gt;如何写一个易用的库&lt;/code&gt;。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。&lt;/p&gt;
+      &lt;h3 id=&quot;u5F15_u8A00&quot;&gt;&lt;a href=&quot;#u5F15_u8A00&quot; class=&quot;headerlink&quot; title=&quot;引言&quot;&gt;&lt;/a&gt;引言&lt;/h3&gt;&lt;p&gt;开始萌生出要写这个 &lt;a href=&quot;https://github.com/maquannene/Track&quot;&gt;&lt;strong&gt;Cache&lt;/strong&gt;&lt;/a&gt; 念头，是想要练习一下 &lt;code&gt;Swift&lt;/code&gt; 这门语言，顺便实战 &lt;code&gt;GCD 达到多线程安全&lt;/code&gt; 和思考 &lt;code&gt;如何写一个易用的库&lt;/code&gt;。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。&lt;/p&gt;
 &lt;p&gt;这个库没有用到特别高深的技巧，也没有特别复杂的算法，但是完成的过程让我学习到了很多东西，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设计等等，建议读下去。&lt;/p&gt;
     
     </summary>
@@ -123,10 +121,9 @@
     <link href="http://yoursite.com/2016/02/23/Git-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
     <id>http://yoursite.com/2016/02/23/Git-学习笔记/</id>
     <published>2016-02-23T05:47:53.000Z</published>
-    <updated>2016-06-20T08:53:39.000Z</updated>
+    <updated>2016-06-20T12:24:30.000Z</updated>
     
-    <content type="html">&lt;p&gt;&lt;br&gt;&lt;/p&gt;
-&lt;h3 id=&quot;u4E00-Git__u7684_u4EA7_u751F&quot;&gt;&lt;a href=&quot;#u4E00-Git__u7684_u4EA7_u751F&quot; class=&quot;headerlink&quot; title=&quot;一.Git 的产生&quot;&gt;&lt;/a&gt;一.Git 的产生&lt;/h3&gt;&lt;p&gt;作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物&lt;/p&gt;
+    <content type="html">&lt;h3 id=&quot;u4E00-Git__u7684_u4EA7_u751F&quot;&gt;&lt;a href=&quot;#u4E00-Git__u7684_u4EA7_u751F&quot; class=&quot;headerlink&quot; title=&quot;一.Git 的产生&quot;&gt;&lt;/a&gt;一.Git 的产生&lt;/h3&gt;&lt;p&gt;作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;http://img0.imgtn.bdimg.com/it/u=2504201466,3383861494&amp;amp;fm=21&amp;amp;gp=0.jpg&quot; alt=&quot;Linus&quot;&gt;&lt;/p&gt;
 &lt;p&gt;Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。&lt;/p&gt;
 &lt;p&gt;2002 以前 ，contributors 把源代码文件通过 diff 的方式发给 Linus，Linus 和 维护者 &lt;code&gt;手工方式&lt;/code&gt; merge。&lt;/p&gt;
@@ -251,13 +248,12 @@
 &lt;h3 id=&quot;u516D-__u8F85_u52A9_u5229_u5668&quot;&gt;&lt;a href=&quot;#u516D-__u8F85_u52A9_u5229_u5668&quot; class=&quot;headerlink&quot; title=&quot;六. 辅助利器&quot;&gt;&lt;/a&gt;六. 辅助利器&lt;/h3&gt;&lt;h4 id=&quot;1-Zsh&quot;&gt;&lt;a href=&quot;#1-Zsh&quot; class=&quot;headerlink&quot; title=&quot;1.Zsh&quot;&gt;&lt;/a&gt;1.&lt;a href=&quot;https://github.com/robbyrussell/oh-my-zsh&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Zsh&lt;/a&gt;&lt;/h4&gt;&lt;h4 id=&quot;2-GitDiff&quot;&gt;&lt;a href=&quot;#2-GitDiff&quot; class=&quot;headerlink&quot; title=&quot;2.GitDiff&quot;&gt;&lt;/a&gt;2.&lt;a href=&quot;https://github.com/johnno1962/GitDiff&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;GitDiff&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;h3 id=&quot;u4E03-__u6269_u5C55&quot;&gt;&lt;a href=&quot;#u4E03-__u6269_u5C55&quot; class=&quot;headerlink&quot; title=&quot;七. 扩展&quot;&gt;&lt;/a&gt;七. 扩展&lt;/h3&gt;&lt;h4 id=&quot;1-git_config&quot;&gt;&lt;a href=&quot;#1-git_config&quot; class=&quot;headerlink&quot; title=&quot;1.git config&quot;&gt;&lt;/a&gt;1.git config&lt;/h4&gt;&lt;h4 id=&quot;2-git_rebase_-i&quot;&gt;&lt;a href=&quot;#2-git_rebase_-i&quot; class=&quot;headerlink&quot; title=&quot;2.git rebase -i&quot;&gt;&lt;/a&gt;2.git rebase -i&lt;/h4&gt;&lt;h4 id=&quot;3-cherry-pick&quot;&gt;&lt;a href=&quot;#3-cherry-pick&quot; class=&quot;headerlink&quot; title=&quot;3.cherry-pick&quot;&gt;&lt;/a&gt;3.cherry-pick&lt;/h4&gt;&lt;p&gt;将一个提交点重新应用到当前分支，此时是一个新的提交号&lt;/p&gt;
 &lt;figure class=&quot;highlight objc&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;git cherry-pick [commit]&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;注意：永远不要 cherry-pick 已推送到远端的 commit，否则再次推送时会产生冲突。&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;注意：永远不要 cherry-pick 已推送到远端的 commit，否则再次推送时会产生冲突。&lt;/del&gt;&lt;br&gt;这句话是我错误的认知，删去。cherry-pick 的提交点再次合并回去之后，不会引起冲突。&lt;/p&gt;
 &lt;h4 id=&quot;4-gitignore&quot;&gt;&lt;a href=&quot;#4-gitignore&quot; class=&quot;headerlink&quot; title=&quot;4..gitignore&quot;&gt;&lt;/a&gt;4..gitignore&lt;/h4&gt;&lt;h4 id=&quot;5-alias&quot;&gt;&lt;a href=&quot;#5-alias&quot; class=&quot;headerlink&quot; title=&quot;5.alias&quot;&gt;&lt;/a&gt;5.alias&lt;/h4&gt;&lt;h4 id=&quot;6-ssh&quot;&gt;&lt;a href=&quot;#6-ssh&quot; class=&quot;headerlink&quot; title=&quot;6.ssh&quot;&gt;&lt;/a&gt;6.ssh&lt;/h4&gt;</content>
     
     <summary type="html">
     
-      &lt;p&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h3 id=&quot;u4E00-Git__u7684_u4EA7_u751F&quot;&gt;&lt;a href=&quot;#u4E00-Git__u7684_u4EA7_u751F&quot; class=&quot;headerlink&quot; title=&quot;一.Git 的产生&quot;&gt;&lt;/a&gt;一.Git 的产生&lt;/h3&gt;&lt;p&gt;作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物&lt;/p&gt;
+      &lt;h3 id=&quot;u4E00-Git__u7684_u4EA7_u751F&quot;&gt;&lt;a href=&quot;#u4E00-Git__u7684_u4EA7_u751F&quot; class=&quot;headerlink&quot; title=&quot;一.Git 的产生&quot;&gt;&lt;/a&gt;一.Git 的产生&lt;/h3&gt;&lt;p&gt;作者：林纳斯·托瓦兹 （Linus Torvalds），Linux 的伟大的副产物&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;http://img0.imgtn.bdimg.com/it/u=2504201466,3383861494&amp;amp;fm=21&amp;amp;gp=0.jpg&quot; alt=&quot;Linus&quot;&gt;&lt;/p&gt;
 &lt;p&gt;Linus 在 1991 年创建了开源的 Linux 之后靠着开发者共同维护。&lt;/p&gt;
 &lt;p&gt;2002 以前 ，contributors 把源代码文件通过 diff 的方式发给 Linus，Linus 和 维护者 &lt;code&gt;手工方式&lt;/code&gt; merge。&lt;/p&gt;
