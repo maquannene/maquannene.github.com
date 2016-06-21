@@ -272,7 +272,7 @@
     <link href="http://yoursite.com/2016/02/19/iOS-%E4%B8%AD-APP-%E5%9B%9E%E5%88%B0%E5%89%8D%E5%8F%B0%E9%80%9A%E7%9F%A5%E7%9A%84%E9%80%89%E6%8B%A9/"/>
     <id>http://yoursite.com/2016/02/19/iOS-中-APP-回到前台通知的选择/</id>
     <published>2016-02-19T07:01:32.000Z</published>
-    <updated>2016-02-25T09:07:44.000Z</updated>
+    <updated>2016-06-20T12:24:14.000Z</updated>
     
     <content type="html">&lt;p&gt;&lt;strong&gt;UIApplicationWillEnterForegroundNotification&lt;/strong&gt;&lt;br&gt;iOS 中检测 APP 回到前台一般使用通知策略，正常的情况下我们选择此条通知，这条通知的接受时机是 app 将要进入前台。&lt;br&gt;&lt;br&gt;&lt;strong&gt;UIApplicationDidBecomeActiveNotification&lt;/strong&gt;&lt;br&gt;但是也有人会选择这一条通知，从名称上来看，此通知的接受时机是：app 已经变为激活状态。&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;br&gt;我在做一个需求时，在这两条通知的选择上除了点小错。&lt;br&gt;需求是：当&lt;code&gt;程序启动&lt;/code&gt;或者&lt;code&gt;程序从后台切到前台&lt;/code&gt;时，显示输入密码界面。&lt;br&gt;于是我监听这个通知 &lt;code&gt;UIApplicationWillEnterForegroundNotification&lt;/code&gt;，然后在 selector 中去 show 密码界面。&lt;br&gt;结果发现如果程序启动时，这个通知并不会被调到，之后发现有另外一条通知，&lt;code&gt;UIApplicationDidBecomeActiveNotification&lt;/code&gt;。&lt;br&gt;这个通知相比于 &lt;code&gt;UIApplicationWillEnterForegroundNotification&lt;/code&gt; 在启动的时候是会发送的。&lt;br&gt;&lt;br&gt;总结：&lt;br&gt;UIApplicationWillEnterForegroundNotification：只有回到前台，启动 app 不算&lt;br&gt;UIApplicationDidBecomeActiveNotification：回到前台 + 启动 app&lt;br&gt;&lt;br&gt;如果两条通知都监听，那么 UIApplicationWillEnterForegroundNotification 是要早于 UIApplicationDidBecomeActiveNotification。&lt;br&gt;&lt;br&gt;简单的知识点，有时候还是存在疏漏的。&lt;/p&gt;
 </content>
@@ -378,9 +378,9 @@
     <link href="http://yoursite.com/2015/11/20/2015-11-20-the-resolution-of-block-nil-in-mrc/"/>
     <id>http://yoursite.com/2015/11/20/2015-11-20-the-resolution-of-block-nil-in-mrc/</id>
     <published>2015-11-20T09:44:56.000Z</published>
-    <updated>2016-01-13T10:02:59.000Z</updated>
+    <updated>2016-06-21T01:26:16.000Z</updated>
     
-    <content type="html">&lt;p&gt;iOS开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也只是 AR C的。ARC 环境中，一个 var 声明的是&lt;code&gt;__weak&lt;/code&gt;，那么当这个 var 不再被 &lt;code&gt;__strong&lt;/code&gt; 引用时，这个 &lt;code&gt;__weak&lt;/code&gt; 的 var 就会自动变成 nil，所以大多数情况下不必担心因为没有置 nil 而导致的野指针崩溃。&lt;/p&gt;
+    <content type="html">&lt;p&gt;iOS 开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也只是 ARC的。ARC 环境中，一个 var 声明的是&lt;code&gt;__weak&lt;/code&gt;，那么当这个 var 不再被 &lt;code&gt;__strong&lt;/code&gt; 引用时，这个 &lt;code&gt;__weak&lt;/code&gt; 的 var 就会自动变成 nil，所以大多数情况下不必担心因为没有置 nil 而导致的野指针崩溃。&lt;/p&gt;
 &lt;p&gt;但是，如果仍旧使用的是MRC，那么就不得不面对这个问题：&lt;br&gt;网络请求中，大量使用到 block，如果当 block 中引用到了一个被 &lt;code&gt;__block&lt;/code&gt; 关键字声明的变量，并且在这个 block 被回调的时候，这个 var 已经被释放了，那么此时 block 中捕获的这个 var 就成为了一个野指针。Objective-C 中，向一个 nil 的对象发送消息是不会崩溃的，但是对一个野指针发送对象是必然崩溃的。&lt;/p&gt;
 &lt;p&gt;那么问题来了，如何在 MRC 下避免这种崩溃的发生。&lt;br&gt;&lt;a id=&quot;more&quot;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h4 id=&quot;u65B9_u6CD5_u4E00_uFF1A_u5C06_MRC__u7684_u6587_u4EF6_u6539_u6210_ARC__u7684&quot;&gt;&lt;a href=&quot;#u65B9_u6CD5_u4E00_uFF1A_u5C06_MRC__u7684_u6587_u4EF6_u6539_u6210_ARC__u7684&quot; class=&quot;headerlink&quot; title=&quot;方法一：将 MRC 的文件改成 ARC 的&quot;&gt;&lt;/a&gt;方法一：将 MRC 的文件改成 ARC 的&lt;/h4&gt;&lt;p&gt;如果都是这样改，那我还写这篇干个毛啊。关键在于，工程中MRC的文件太多了，行数少的一百多行还能改，上千行的就放弃吧。&lt;/p&gt;
@@ -413,7 +413,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;iOS开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也只是 AR C的。ARC 环境中，一个 var 声明的是&lt;code&gt;__weak&lt;/code&gt;，那么当这个 var 不再被 &lt;code&gt;__strong&lt;/code&gt; 引用时，这个 &lt;code&gt;__weak&lt;/code&gt; 的 var 就会自动变成 nil，所以大多数情况下不必担心因为没有置 nil 而导致的野指针崩溃。&lt;/p&gt;
+      &lt;p&gt;iOS 开发目前已是全民 ARC 的时代，而且苹果的新语言 swift 也只是 ARC的。ARC 环境中，一个 var 声明的是&lt;code&gt;__weak&lt;/code&gt;，那么当这个 var 不再被 &lt;code&gt;__strong&lt;/code&gt; 引用时，这个 &lt;code&gt;__weak&lt;/code&gt; 的 var 就会自动变成 nil，所以大多数情况下不必担心因为没有置 nil 而导致的野指针崩溃。&lt;/p&gt;
 &lt;p&gt;但是，如果仍旧使用的是MRC，那么就不得不面对这个问题：&lt;br&gt;网络请求中，大量使用到 block，如果当 block 中引用到了一个被 &lt;code&gt;__block&lt;/code&gt; 关键字声明的变量，并且在这个 block 被回调的时候，这个 var 已经被释放了，那么此时 block 中捕获的这个 var 就成为了一个野指针。Objective-C 中，向一个 nil 的对象发送消息是不会崩溃的，但是对一个野指针发送对象是必然崩溃的。&lt;/p&gt;
 &lt;p&gt;那么问题来了，如何在 MRC 下避免这种崩溃的发生。&lt;br&gt;
     
