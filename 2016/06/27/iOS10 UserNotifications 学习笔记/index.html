@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="description"><meta name="viewport" content="width=device-width, initial-scale=1"><title>马权讷讷</title><link rel="short icon" href="/favicon.ico"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/fonts/iconfont/iconfont.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:400,600|Roboto Mono"></head><body><div id="main"><header><a href="/." class="logo">马权讷讷</a><ul class="nav"><li class="nav-link"><a href="/" target="_self">首页</a></li><li class="nav-link"><a href="/archives/" target="_self">归档</a></li><li class="nav-link"><a href="/tags/" target="_self">标签</a></li><li class="nav-link"><a href="/about/" target="_self">关于</a></li></ul></header><section id="container"><article class="post"><h1 class="post-title">iOS10 User Notifications 学习笔记</h1><span class="post-time">Jun 27, 2016</span><div class="post-content"><p><img src="http://ww3.sinaimg.cn/large/65312d9agw1f5a8zns61uj215y0esdgp.jpg" alt="Advanced Notifications"></p>
-<p>这几天研究了一下 iOS10 的 User Notifications，相比于老的，新的通知中心增加了一些功能，比如以 Extension 形式提供给用户使用的 <code>UNNotificationContentExtension（推送通知内容扩展）</code> ；供开发者自定义通知触发条件的 <code>UNNotificationTrigger（触发条件设定）</code>；以及提供用户可加入 <code>UNNotificationAttachment（附件携带）</code> 用来预览。除此之外从苹果的 PDF 上还写了 User Notifications 其它几项优势：</p>
+<p>这几天研究了一下 iOS10 的 User Notifications，相比于老的，新的通知中心增加了一些功能，比如以 Extension 形式提供给用户使用的 <code>UNNotificationContentExtension（通知内容扩展）</code> ；供开发者自定义通知触发条件的 <code>UNNotificationTrigger（触发条件设定）</code>；以及提供用户可加入 <code>UNNotificationAttachment（通知附件）</code> 用来预览。除此之外苹果的 PDF 上还写其它几项优势：</p>
 <ul>
 <li>和功能更加相似的 API 设计</li>
 <li>处理远程推送和本地推送处的代码位置相同</li>
@@ -7,18 +7,18 @@
 <li>当然最重要一点：通知扩展 Notification Extension</li>
 </ul>
 <a id="more"></a>
-<p>具体我会从下面几个方面讲解新通知中心的功能：</p>
+<p>具体我会从下面几个方面介绍新通知中心的功能：</p>
 <ul>
 <li><ol>
-<li>UNNotificationTrigger（触发条件设定）</li>
+<li>UNNotificationTrigger（通知触发条件设定）</li>
 </ol>
 </li>
 <li><ol>
-<li>UNNotificationAttachment （附件携带）</li>
+<li>UNNotificationAttachment （通知附件）</li>
 </ol>
 </li>
 <li><ol>
-<li>UNNotificationContent （通知内容扩展）</li>
+<li>UNNotificationContentExtension （通知内容扩展）</li>
 </ol>
 </li>
 <li><ol>
@@ -29,25 +29,25 @@
 <p>并且在文章最后给出具体的的 Demo 供大家参考。</p>
 <h3 id="1-_UNNotificationTrigger_-__u901A_u77E5_u89E6_u53D1_u6761_u4EF6_u8BBE_u5B9A"><a href="#1-_UNNotificationTrigger_-__u901A_u77E5_u89E6_u53D1_u6761_u4EF6_u8BBE_u5B9A" class="headerlink" title="1. UNNotificationTrigger - 通知触发条件设定"></a>1. UNNotificationTrigger - 通知触发条件设定</h3><p><img src="http://ww3.sinaimg.cn/large/65312d9agw1f59uzqam85j21kw0iaq55.jpg" alt="Trigger"></p>
 <p>A UNNotificationTrigger object represents an event that triggers the delivery of a notification. This class is abstract, so you do not create instances of it directly. Instead, you create instances of a concrete subclass that define the trigger conditions you want. You then use the trigger object to create the UNNotificationRequest object needed to schedule the delivery of the notification.</p>
-<p>Trigger 是新加入的一个特性，通过此类可设置本地通知的触发条件。UNNotificationTrigger 是通知触发条件类的基类，不应该直接使用它，而是使用下面这些子类：</p>
+<p>Trigger 是新加入的一个功能，通过此类可设置本地通知的触发条件。UNNotificationTrigger 是通知触发条件类的基类，不应该直接使用它，而是使用下面这些子类：</p>
 <ul>
 <li>UNPushNotificationTrigger</li>
 </ul>
 <p>这个是苹果通知服务的 Trigger，对外没有暴露任何接口属性，不需要开发者创建，由系统创建。</p>
 <ul>
-<li>UNTimeIntervalNotificationTrigger</li>
+<li>UNTimeIntervalNotificationTrigger 时间触发器</li>
 </ul>
-<p>时间触发器，通过初始化方法设置通知的<code>timeInterval（触发间隔）</code>和<code>repeats（是否重复触发）</code>，若 repeats 设置为 false，通知将在 timeInterval 之后被推送。</p>
+<p>通过初始化方法设置通知的<code>timeInterval（触发间隔）</code>和<code>repeats（是否重复触发）</code>，若 repeats 设置为 false，通知将在 timeInterval 之后被推送。</p>
 <ul>
-<li>UNCalendarNotificationTrigger</li>
+<li>UNCalendarNotificationTrigger 日期触发器</li>
 </ul>
 <p>类似 UNTimeIntervalNotificationTrigger，也是时间触发器，只不过初始化时第一个参数为 <code>DateComponents</code> 类型，可设置具体的触发时间比如<code>8:00 AM</code>等，也可设置是否重复触发。</p>
 <ul>
-<li>UNLocationNotificationTrigger</li>
+<li>UNLocationNotificationTrigger 位置触发器</li>
 </ul>
-<p>地点触发器，即通过设置 <code>CLRegion</code> 类型参数设置位置信息，当用户处于某一区域时，自动推送通知。</p>
+<p>通过设置 <code>CLRegion</code> 类型参数设置位置信息，当用户处于某一区域时，自动推送通知。</p>
 <p><strong>使用：</strong></p>
-<p>初始化 UNNotificationRequest 通知请求时传入 UNNotificationTrigger 实例，来设置推送通知触发条件：</p>
+<p>初始化 UNNotificationRequest（通知请求）时传入 UNNotificationTrigger 实例，来设置推送通知触发条件：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  通知触发条件设定为2秒触发一次</span></span><br><span class="line"><span class="keyword">let</span> trigger = <span class="type">UNTimeIntervalNotificationTrigger</span>.<span class="keyword">init</span>(timeInterval: <span class="number">2</span>,</span><br><span class="line">                                                     repeats: <span class="literal">true</span>)</span><br><span class="line">                                                     </span><br><span class="line"><span class="comment">//  创建通知请求，设置触发器</span></span><br><span class="line"><span class="keyword">let</span> request = <span class="type">UNNotificationRequest</span>.<span class="keyword">init</span>(identifier: identifier,</span><br><span class="line">                                         content: content,</span><br><span class="line">                                         trigger: trigger)</span><br></pre></td></tr></table></figure>
 <h3 id="2-_UNNotificationAttachment_-__u901A_u77E5_u9644_u4EF6"><a href="#2-_UNNotificationAttachment_-__u901A_u77E5_u9644_u4EF6" class="headerlink" title="2. UNNotificationAttachment - 通知附件"></a>2. UNNotificationAttachment - 通知附件</h3><p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f59vm2s2uwj21gc0g2acx.jpg" alt="Attachment"></p>
 <p>A UNNotificationAttachment object contains audio, image, or video content to display alongside the notification content. Your app always supplies attachments. For local notifications, the app adds attachments when creating the rest of the notification’s content. You can add attachments to a remote notification by implementing a notification service extension, as represented by the UNNotificationServiceExtension class.</p>
@@ -57,8 +57,8 @@
 <p><strong>使用：</strong></p>
 <ul>
 <li>对于本地通知，创建 UNMutableNotificationContent（通知内容）时设置 attachments （附件）属性即可加入附件。</li>
-<li>对于远程推送通知服务，需要实现 UNNotificationServiceExtension（通知服务扩展），在回调方法中处理 payload 时设置 request.content.attachments 属性，之后调用 contentHandler 方法即可。</li>
-<li>无论是本地或者远程推送，如果没有使用 UNNotificationContentExtension （通知内容扩展），则下拉或重压后（仅限支持3DTouch），附件会直接出现在 Content 中。如下图：</li>
+<li>对于远程推送通知服务，需要实现 UNNotificationServiceExtension（通知服务扩展），在回调方法中处理 推送内容时设置 request.content.attachments（请求内容的附件） 属性，之后调用 contentHandler 方法即可。</li>
+<li>无论是本地或者远程推送，如果没有支持 UNNotificationContentExtension （通知内容扩展），支持 3DTouch 设备下拉或重压后，附件会直接出现在 Content 中。如下图：</li>
 </ul>
 <p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a7x2lu34j20a80dw0tl.jpg" alt="Attachment"></p>
 <p>这里需要说明的是 UNNotificationAttachment 的初始化方法：</p>
@@ -67,13 +67,14 @@
 <p>如果采取的是本地推送，直接读取文件的所在的位置的 URL 即可；如果是远程推送，由于 attachments 的设置是在 NotificationServiceExtension 的 Target 中，若需读取 Bundle 中的文件，记得将资源加入 NotificationServiceExtension Target 的 Copy Bundle Resource，不能直接读取 Containing App Target 中的 Bundle Resource。</p>
 <h3 id="3-_UNNotificationContentExtension_-__u901A_u77E5_u5185_u5BB9_u6269_u5C55"><a href="#3-_UNNotificationContentExtension_-__u901A_u77E5_u5185_u5BB9_u6269_u5C55" class="headerlink" title="3. UNNotificationContentExtension - 通知内容扩展"></a>3. UNNotificationContentExtension - 通知内容扩展</h3><p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f59y734woxj20py068mxu.jpg" alt="ContentExtension"></p>
 <p>The UNNotificationContentExtension protocol lets you present a custom interface for your app’s notifications. You adopt this protocol in custom UIViewController subclasses, using the view controller’s view to display the notification contents. You deliver your view controller class inside a Notification Content extension.</p>
-<p>iOS User Notifications 最大的创新在于加入了以 Extension 形式提供给开发者和用户使用的 UNNotificationContentExtension，但是只支持能使用 3DTouch 的设备…。通知内容扩展需要新建一个 NotificationContent Target，之后只需在 viewcontroller 的中实现相应的接口，即可以对 app 的通知页面进行自定义扩展，扩展主要用于自定义 UI。</p>
+<p>iOS User Notifications 最大的革新在于加入了以 Extension 形式提供给开发者和用户使用的 UNNotificationContentExtension，但是只有支持 3DTouch 的设备下拉或重压才能呼出…，但是明明下拉也可以呼出的控件为什么不支持无 3DTouch 的设备，苹果这盘棋下的好啊。</p>
+<p>通知内容扩展需要新建一个 UNNotificationContentExtension Target，之后只需在 viewcontroller 的中实现相应的接口，即可以对 app 的通知页面进行自定义扩展，扩展主要用于自定义 UI。</p>
 <p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0bmg3ngj207g08umxf.jpg" alt="ContentExtension"></p>
-<p>创建好的 Extension Target 自带一个 ViewController，支持 stroyBoard 使用 autoLayout 布局，但是此 ViewController 不支持交互，加载上面的手势、button 等交互控件都将无效。若需交互，使用 UNNotificationAction 提供按键或输入源，关于 UNNotificationAction 的用法之后 UNNotificationAction 小节会具体讲解。</p>
-<p>扩展页面可以在 plist 中配置，提供三个 key 进行设置:</p>
+<p>创建好的 Extension Target 自带一个 ViewController，支持 stroyBoard 使用 autoLayout 布局，但是此 ViewController 不支持交互，加载上面的手势、button 等交互控件都将无效。若需交互，使用 UNNotificationAction （通知响应事件）提供按键或输入源，关于 UNNotificationAction 的用法之后 UNNotificationAction 小节会具体讲解。</p>
+<p>扩展页面样式可以在 plist 中配置，提供三个 key 进行设置:</p>
 <p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f59zqq40ouj20ss07275w.jpg" alt="扩展配置"></p>
 <ul>
-<li>UNNotificationExtensionCategory: 若需通知支持内容扩展，需要将通知相应的 Category 加入此处。</li>
+<li>UNNotificationExtensionCategory: 要让通知支持内容扩展，需要将通知的 categoryIdentifier（类型标示） 加入此处。</li>
 <li>UNNotificationExtensionDefaultContentHidden: 默认内容隐藏，如果设为 YES，则最下面通知 content 部分会隐藏。</li>
 </ul>
 <p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a0cqbl7aj207e08maaa.jpg" alt="contentHidden"></p>
@@ -82,37 +83,37 @@
 </ul>
 <p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0b1ufmyj207c08yaae.jpg" alt="ration"></p>
 <p><strong>使用：</strong></p>
-<p>远程和本地通知最终都可以使用此扩展自定义 UI，只需将通知的 categoryIdentifier 加入到 plist 中即可。</p>
+<p>远程和本地通知最终都可以使用此扩展自定义 UI，只需将通知的 categoryIdentifier（类型标示） 加入到 plist 中即可。</p>
 <ul>
-<li>本地推送时，确保设置的 content.categoryIdentifier 已加入 plist 中。</li>
+<li>本地推送时，确保设置的 content.categoryIdentifier（通知内容类型标示） 已加入 plist 中。</li>
 <li>远程推送，需要设置 category 字段，且确保值也已加入 plist 中。</li>
 </ul>
-<h3 id="4-_UNNotificationServiceExtension_-__u63A8_u9001_u670D_u52A1_u6269_u5C55"><a href="#4-_UNNotificationServiceExtension_-__u63A8_u9001_u670D_u52A1_u6269_u5C55" class="headerlink" title="4. UNNotificationServiceExtension - 推送服务扩展"></a>4. UNNotificationServiceExtension - 推送服务扩展</h3><p><img src="http://ww1.sinaimg.cn/large/65312d9agw1f5a7mmfbf7j21e60eqmzi.jpg" alt="ServiceExtension"></p>
+<h3 id="4-_UNNotificationServiceExtension_-__u901A_u77E5_u670D_u52A1_u6269_u5C55"><a href="#4-_UNNotificationServiceExtension_-__u901A_u77E5_u670D_u52A1_u6269_u5C55" class="headerlink" title="4. UNNotificationServiceExtension - 通知服务扩展"></a>4. UNNotificationServiceExtension - 通知服务扩展</h3><p><img src="http://ww1.sinaimg.cn/large/65312d9agw1f5a7mmfbf7j21e60eqmzi.jpg" alt="ServiceExtension"></p>
 <p>A UNNotificationServiceExtension object, the principle class for a Notification Service app extension, lets you process the payload of a remote (sometimes called push) notification before it is delivered to the user.</p>
-<p>UNNotificationServiceExtension 提供在远程推送将要被 push 出来前，处理推送 payload 的机会。此时可以对通知的 request.content 进行配置，如配置 UNNotificationAttachment，添加 userInfo 等。</p>
-<p>通过远程推送的通知也支持 UNNotificationContentExtension，只需将推送数据中 category 的值设置为已经添加到 UNNotificationContentExtension plist 中的值即可。</p>
+<p>UNNotificationServiceExtension 提供在远程推送将要被 push 出来前，处理推送显示内容的机会。此时可以对通知的 request.content 进行内容添加，如添加附件，userInfo 等。</p>
+<p>通过远程推送的通知也支持 UNNotificationContentExtension，只需将 content.categoryIdentifier （通知内容类型标示） 的值设置为已经添加到 UNNotificationContentExtension plist 中的值即可。</p>
 <p>服务器推送信息示例：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#10;  &#34;aps&#34; : &#123;&#10;    &#34;alert&#34; : &#123;&#10;      &#34;title&#34; : &#34;title&#34;,&#10;      &#34;body&#34; : &#34;Your message Here&#34;&#9;&#9;&#10;    &#125;,&#10;    // &#24320;&#21551;&#21487;&#21464;&#20869;&#23481;&#10;    &#34;mutable-content&#34; : &#34;1&#34;,&#9;&#9;&#9;&#10;    // category &#20026;&#24050;&#28155;&#21152;&#20837; UNNotificationContentExtension plist &#30340;&#20540;&#26102;&#65292;&#21363;&#21487;&#25903;&#25345; UNNotificationContentExtension&#10;    &#34;category&#34; : &#34;Cheer&#34;&#9;&#9;&#9;&#9;&#10;  &#125;,&#10;  // &#21152;&#20837;&#33258;&#23450;&#20041;&#25968;&#25454;&#65292;&#22270;&#29255; url &#36335;&#24452;&#10;  &#34;imageAbsoluteString&#34; : &#34;http://....jpg&#34;&#10;&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="5-_UNNotificationAction__u901A_u77E5_u4EA4_u4E92_u4E8B_u4EF6"><a href="#5-_UNNotificationAction__u901A_u77E5_u4EA4_u4E92_u4E8B_u4EF6" class="headerlink" title="5. UNNotificationAction 通知交互事件"></a>5. UNNotificationAction 通知交互事件</h3><p>A UNNotificationAction object represents a task that your app can perform in response to a notification. You can define custom different actions for each type of notification that your app supports. The action object itself contains information about how to display that action onscreen. When the user selects that action, the system forwards the action’s identifier string to your app so that you can perform the corresponding task.</p>
+<h3 id="5-_UNNotificationAction__u901A_u77E5_u54CD_u5E94_u4E8B_u4EF6"><a href="#5-_UNNotificationAction__u901A_u77E5_u54CD_u5E94_u4E8B_u4EF6" class="headerlink" title="5. UNNotificationAction 通知响应事件"></a>5. UNNotificationAction 通知响应事件</h3><p>A UNNotificationAction object represents a task that your app can perform in response to a notification. You can define custom different actions for each type of notification that your app supports. The action object itself contains information about how to display that action onscreen. When the user selects that action, the system forwards the action’s identifier string to your app so that you can perform the corresponding task.</p>
 <p>UNNotificationAction 代表一个响应通知的事件。可以为每个通知设置不同的交互事件。下拉推送通知或处在锁屏界面侧滑通知时，会出现交互按键。</p>
 <p>交互事件主要分为以下两类：</p>
 <p><strong>UNNotificationAction：</strong></p>
-<p>普通点击按键，可设置标示 identifier、 title 及 点击后的响应，例如：foreground 前台响应，destructive 点击后销毁通知，authenticationRequired 响应前是否需要解锁。</p>
+<p>普通点击按键，可设置 identifier、 title 及 点击后的响应，例如：foreground 前台响应，destructive 点击后销毁通知，authenticationRequired 响应前是否需要解锁。</p>
 <p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a8uirxk9j20aa0hqwfh.jpg" alt="ContentExtension"></p>
 <p><strong>UNTextInputNotificationAction：</strong></p>
-<p>继承自 UNNotificationAction，点击后呼出输入框进行输入交互。需要说的是，如果设备不支持 3DTouch，则不会支持这个功能，又是一个 @$#@%#$ 的设定。</p>
+<p>继承自 UNNotificationAction，点击后呼出输入框进行输入交互。需要说的是，如果设备不支持 3DTouch，则不会支持这个功能。</p>
 <p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a92073g9j20ac0e0mxx.jpg" alt="UNTextInputNotificationAction"></p>
 <p><strong>响应处理：</strong></p>
-<p>若处于 UNNotificationServiceExtension 通知扩展界面时，点击按键会回调 UNNotificationServiceExtension 扩展接口的方法：</p>
+<p>若处于 UNNotificationContentExtension 通知扩展界面时，点击按键会回调 UNNotificationContentExtension 扩展接口的方法：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">didReceive</span><span class="params">(<span class="number">_</span> response: UNNotificationResponse,</span><br><span class="line">                completionHandler completion: <span class="params">(UNNotificationContentExtensionResponseOption)</span></span></span> -&gt; <span class="type">Void</span>)</span><br></pre></td></tr></table></figure>
-<p>如果不支持 UNNotificationServiceExtension</p>
+<p>如果不支持 UNNotificationContentExtension</p>
 <p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a8siotq5j20d2072mxm.jpg" alt="noContentExtension"></p>
 <p>则点击会回调 UNUserNotificationCenterDelegate 中的方法：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">userNotificationCenter</span><span class="params">(<span class="number">_</span> center: UNUserNotificationCenter,</span><br><span class="line">                            didReceive response: UNNotificationResponse,</span><br><span class="line">                            withCompletionHandler completionHandler: <span class="params">()</span></span></span> -&gt; <span class="type">Void</span>) &#123;</span><br></pre></td></tr></table></figure>
-<h3 id="u7ED3_u675F_u8BED"><a href="#u7ED3_u675F_u8BED" class="headerlink" title="结束语"></a>结束语</h3><p>到这里 User Notifications 的功能就差不多了，可以看出几个核心的功能都需要 3DTouch 的支持，所以实用性方面还是比较受限制。</p>
-<p>UNNotificationAttachment 的加入给产品的带来了更多的思路，这个方向还是很值得去探索的。</p>
-<p>如果支持 3DTouch，UNTextInputNotificationAction 对于消息的回复或者评论的回复都很方便，甚至不用开启应用就能评论或转发一条新鲜的微博。</p>
-<p><a href="https://github.com/maquannene/UserNotifications" target="_blank" rel="external">Demo</a> 我已上传至 github，如发现问题，请帮忙指正，感谢阅读。（Demo运行时，请重新设置配置文件方可运行）</p>
+<h3 id="u7ED3_u675F_u8BED"><a href="#u7ED3_u675F_u8BED" class="headerlink" title="结束语"></a>结束语</h3><p>到这里 User Notifications 的功能就介绍的差不多了，可以看出几个核心的功能都需要 3DTouch 的支持，所以实用性方面还是比较受限制。</p>
+<p>UNNotificationAttachment（附件） 的加入给产品的带来了更多的思路，这个方向还是很值得去探索的。</p>
+<p>如果支持 3DTouch，UNTextInputNotificationAction 对于消息评论的回复或者微博的转发都是很方便的，这些不用处在 APP 前台就能完成。</p>
+<p>更多代码实现请查看 <a href="https://github.com/maquannene/UserNotifications" target="_blank" rel="external">Demo</a>，如发现问题，请帮忙指正，感谢阅读。（Demo运行时，请重新设置证书配置文件方可运行）</p>
 </div></article><div class="tags"><a href="/tags/iOS/">iOS</a></div><div class="paginator"><a href="/2016/06/17/Swift Cache - Track/" class="next"><span>下一页</span><i class="fa fa-chevron-right"></i></a></div><section id="comments"><div id="disqus_thread"></div></section><script type="text/javascript">(function() {
 var d = document, s = d.createElement('script');
 
