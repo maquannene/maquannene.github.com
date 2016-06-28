@@ -9,22 +9,10 @@
 <a id="more"></a>
 <p>具体我会从下面几个方面介绍新通知中心的功能：</p>
 <ul>
-<li><ol>
-<li>UNNotificationTrigger（通知触发条件设定）</li>
-</ol>
-</li>
-<li><ol>
-<li>UNNotificationAttachment （通知附件）</li>
-</ol>
-</li>
-<li><ol>
-<li>UNNotificationContentExtension （通知内容扩展）</li>
-</ol>
-</li>
-<li><ol>
-<li>UNNotificationServiceExtension （通知服务扩展）</li>
-</ol>
-</li>
+<li>1 . UNNotificationTrigger（通知触发条件设定）</li>
+<li>2 . UNNotificationAttachment （通知附件）</li>
+<li>3 . UNNotificationContentExtension （通知内容扩展）</li>
+<li>4 . UNNotificationServiceExtension （通知服务扩展）</li>
 </ul>
 <p>并且在文章最后给出具体的的 Demo 供大家参考。</p>
 <h3 id="1-_UNNotificationTrigger_-__u901A_u77E5_u89E6_u53D1_u6761_u4EF6_u8BBE_u5B9A"><a href="#1-_UNNotificationTrigger_-__u901A_u77E5_u89E6_u53D1_u6761_u4EF6_u8BBE_u5B9A" class="headerlink" title="1. UNNotificationTrigger - 通知触发条件设定"></a>1. UNNotificationTrigger - 通知触发条件设定</h3><p><img src="http://ww3.sinaimg.cn/large/65312d9agw1f59uzqam85j21kw0iaq55.jpg" alt="Trigger"></p>
@@ -53,14 +41,16 @@
 <p>A UNNotificationAttachment object contains audio, image, or video content to display alongside the notification content. Your app always supplies attachments. For local notifications, the app adds attachments when creating the rest of the notification’s content. You can add attachments to a remote notification by implementing a notification service extension, as represented by the UNNotificationServiceExtension class.</p>
 <p>推送的通知允许夹带一个附件，格式支持视频，音频，图片。</p>
 <p>苹果的文档中对文件的类型和大小做了如下限制：</p>
-<p><img src="http://ww1.sinaimg.cn/large/65312d9agw1f5a6clk2uij20lq0ki0u7.jpg" alt="文件限制"></p>
+<p style="text-align: center"><br><img src="http://ww1.sinaimg.cn/large/65312d9agw1f5a6clk2uij20lq0ki0u7.jpg" width="350"><br></p>
+
 <p><strong>使用：</strong></p>
 <ul>
 <li>对于本地通知，创建 UNMutableNotificationContent（通知内容）时设置 attachments （附件）属性即可加入附件。</li>
 <li>对于远程推送通知服务，需要实现 UNNotificationServiceExtension（通知服务扩展），在回调方法中处理 推送内容时设置 request.content.attachments（请求内容的附件） 属性，之后调用 contentHandler 方法即可。</li>
 <li>无论是本地或者远程推送，如果没有支持 UNNotificationContentExtension （通知内容扩展），支持 3DTouch 设备下拉或重压后，附件会直接出现在 Content 中。如下图：</li>
 </ul>
-<p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a7x2lu34j20a80dw0tl.jpg" alt="Attachment"></p>
+<p style="text-align: center"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a7x2lu34j20a80dw0tl.jpg" width="250"><br></p>
+
 <p>这里需要说明的是 UNNotificationAttachment 的初始化方法：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">init</span><span class="params">(identifier: String, url URL: URL, options: [NSObject : AnyObject]? = [:])</span></span> <span class="keyword">throws</span></span><br></pre></td></tr></table></figure>
 <p>的第二个参数 <code>url</code> 指的是附件的 url，此附件必须在本地硬盘上，否则创建时可能出现异常抛出。</p>
@@ -69,7 +59,8 @@
 <p>The UNNotificationContentExtension protocol lets you present a custom interface for your app’s notifications. You adopt this protocol in custom UIViewController subclasses, using the view controller’s view to display the notification contents. You deliver your view controller class inside a Notification Content extension.</p>
 <p>iOS User Notifications 最大的革新在于加入了以 Extension 形式提供给开发者和用户使用的 UNNotificationContentExtension，但是只有支持 3DTouch 的设备下拉或重压才能呼出…，但是明明下拉也可以呼出的控件为什么不支持无 3DTouch 的设备，苹果这盘棋下的好啊。</p>
 <p>通知内容扩展需要新建一个 UNNotificationContentExtension Target，之后只需在 viewcontroller 的中实现相应的接口，即可以对 app 的通知页面进行自定义扩展，扩展主要用于自定义 UI。</p>
-<p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0bmg3ngj207g08umxf.jpg" alt="ContentExtension"></p>
+<p style="text-align: center"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0bmg3ngj207g08umxf.jpg" width="250"><br></p>
+
 <p>创建好的 Extension Target 自带一个 ViewController，支持 stroyBoard 使用 autoLayout 布局，但是此 ViewController 不支持交互，加载上面的手势、button 等交互控件都将无效。若需交互，使用 UNNotificationAction （通知响应事件）提供按键或输入源，关于 UNNotificationAction 的用法之后 UNNotificationAction 小节会具体讲解。</p>
 <p>扩展页面样式可以在 plist 中配置，提供三个 key 进行设置:</p>
 <p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f59zqq40ouj20ss07275w.jpg" alt="扩展配置"></p>
@@ -77,11 +68,13 @@
 <li>UNNotificationExtensionCategory: 要让通知支持内容扩展，需要将通知的 categoryIdentifier（类型标示） 加入此处。</li>
 <li>UNNotificationExtensionDefaultContentHidden: 默认内容隐藏，如果设为 YES，则最下面通知 content 部分会隐藏。</li>
 </ul>
-<p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a0cqbl7aj207e08maaa.jpg" alt="contentHidden"></p>
+<p style="text-align: center"><br><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a0cqbl7aj207e08maaa.jpg" width="250"><br></p>
+
 <ul>
 <li>UNNotificationExtensionIntialContentSizeRation: 初始内容 Size 的比例。也可以在 viewDidLoad 中使用 self.preferredContentSize 直接设置 Size。</li>
 </ul>
-<p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0b1ufmyj207c08yaae.jpg" alt="ration"></p>
+<p style="text-align: center"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a0b1ufmyj207c08yaae.jpg" width="250"><br></p>
+
 <p><strong>使用：</strong></p>
 <p>远程和本地通知最终都可以使用此扩展自定义 UI，只需将通知的 categoryIdentifier（类型标示） 加入到 plist 中即可。</p>
 <ul>
@@ -99,15 +92,18 @@
 <p>交互事件主要分为以下两类：</p>
 <p><strong>UNNotificationAction：</strong></p>
 <p>普通点击按键，可设置 identifier、 title 及 点击后的响应，例如：foreground 前台响应，destructive 点击后销毁通知，authenticationRequired 响应前是否需要解锁。</p>
-<p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a8uirxk9j20aa0hqwfh.jpg" alt="ContentExtension"></p>
+<p style="text-align: center"><br><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a8uirxk9j20aa0hqwfh.jpg" width="250"><br></p>
+
 <p><strong>UNTextInputNotificationAction：</strong></p>
 <p>继承自 UNNotificationAction，点击后呼出输入框进行输入交互。需要说的是，如果设备不支持 3DTouch，则不会支持这个功能。</p>
-<p><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a92073g9j20ac0e0mxx.jpg" alt="UNTextInputNotificationAction"></p>
+<p style="text-align: center"><br><img src="http://ww4.sinaimg.cn/large/65312d9agw1f5a92073g9j20ac0e0mxx.jpg" width="250"><br></p>
+
 <p><strong>响应处理：</strong></p>
 <p>若处于 UNNotificationContentExtension 通知扩展界面时，点击按键会回调 UNNotificationContentExtension 扩展接口的方法：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">didReceive</span><span class="params">(<span class="number">_</span> response: UNNotificationResponse,</span><br><span class="line">                completionHandler completion: <span class="params">(UNNotificationContentExtensionResponseOption)</span></span></span> -&gt; <span class="type">Void</span>)</span><br></pre></td></tr></table></figure>
 <p>如果不支持 UNNotificationContentExtension</p>
-<p><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a8siotq5j20d2072mxm.jpg" alt="noContentExtension"></p>
+<p style="text-align: center"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f5a8siotq5j20d2072mxm.jpg" width="250"><br></p>
+
 <p>则点击会回调 UNUserNotificationCenterDelegate 中的方法：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">userNotificationCenter</span><span class="params">(<span class="number">_</span> center: UNUserNotificationCenter,</span><br><span class="line">                            didReceive response: UNNotificationResponse,</span><br><span class="line">                            withCompletionHandler completionHandler: <span class="params">()</span></span></span> -&gt; <span class="type">Void</span>) &#123;</span><br></pre></td></tr></table></figure>
 <h3 id="u7ED3_u675F_u8BED"><a href="#u7ED3_u675F_u8BED" class="headerlink" title="结束语"></a>结束语</h3><p>到这里 User Notifications 的功能就介绍的差不多了，可以看出几个核心的功能都需要 3DTouch 的支持，所以实用性方面还是比较受限制。</p>
