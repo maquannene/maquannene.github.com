@@ -4,11 +4,11 @@
 <h3 id="u52A8_u624B_u5199_u4E4B_u524D"><a href="#u52A8_u624B_u5199_u4E4B_u524D" class="headerlink" title="动手写之前"></a>动手写之前</h3><p>在开始写这个库之前，我已经拜读过 Objective-C 的一些 Cache 的源码，例如 Star 比较多的 <a href="https://github.com/tumblr/TMCache" target="_blank" rel="external">TMCache</a> 以及它的改良版 <a href="https://github.com/pinterest/PINCache" target="_blank" rel="external">PINCache</a>，以及功能不是那么强大的 EGOCache 和 SDImageCache，当然还有大名鼎鼎的 <a href="https://github.com/ibireme/YYCache" target="_blank" rel="external">YYCache</a>。相比之下 Swift 的此类库就相对少一些，<a href="https://github.com/aschuch/AwesomeCache" target="_blank" rel="external">AwesomeCache</a> 算是 Star 相对多一些的库了，其他类似 Haneke 功能不在对比的范围内。</p>
 <p>我对几个功能齐全的库的同步读写做了一个大概的测试（这里没有将任何一个 Swift 库加入对比中，因为确实没有找到功能比较齐全的库，比如 AwesomeCache 是没有区分 Memory 和 Disk 的，并且功能比较少。AwesomeCache 的 Memory 直接用的是 NSCache，所以我将 NSCache 加入了测试中）结果如下图：</p>
 <p>下图为 <code>MemoryCache</code> 对随机产生的不重复 key value 数组进行读写测试：</p>
-<p style="overflow: hidden;"><br><img src="http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg" width="300" style="float: left;"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg" width="300" style="float: left;"><br></p>
+<p style="overflow: hidden;"><br><img src="http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg" width="350" style="float: left;"><img src="http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg" width="350" style="float: left;"><br></p>
 
 <p>YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰功能，但并没有引入 LRU 算法，所以在写入后的淘汰数据阶段 YY 和 Track 要快于其他 Cache 的重排序淘汰。其中 TM 速度非常慢，原因在于 TM 的 GCD 调度策略存在很大的问题，会导致同步小数据读写性能都损耗在 GCD 的调度上。这里值得一说的是 NSCache 对随机 key value 的读写性能不错，尤其是读，但是一旦出现相似形数据，性能就会变得非常低。</p>
 <p>下图为 <code>DiskCache</code> 对随机产生的不重复 key value 数组进行读写测试：</p>
-<p style="overflow: hidden;"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg" width="300" style="float: left;"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg" width="300" style="float: left;"><br></p>
+<p style="overflow: hidden;"><br><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg" width="350" style="float: left;"><img src="http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg" width="350" style="float: left;"><br></p>
 
 <p>很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。</p>
 <h3 id="u5F00_u59CB_u52A8_u624B_u5199"><a href="#u5F00_u59CB_u52A8_u624B_u5199" class="headerlink" title="开始动手写"></a>开始动手写</h3><p>在动手之前，已经了解到了各个库的优劣，所以在写的时候，我尽量提取了一些优点融入了 Track 中，接下来会主要针对以下几点进行说明，某些点对缓存的性能起到了决定性的作用：</p>
