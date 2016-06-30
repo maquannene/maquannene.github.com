@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-06-28T12:42:06.000Z</updated>
+  <updated>2016-06-28T12:47:26.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2016/06/27/iOS10%20UserNotifications%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
     <id>http://yoursite.com/2016/06/27/iOS10 UserNotifications 学习笔记/</id>
     <published>2016-06-27T15:17:41.000Z</published>
-    <updated>2016-06-28T12:42:06.000Z</updated>
+    <updated>2016-06-28T12:47:26.000Z</updated>
     
     <content type="html">&lt;p&gt;&lt;img src=&quot;http://ww3.sinaimg.cn/large/65312d9agw1f5a8zns61uj215y0esdgp.jpg&quot; alt=&quot;Advanced Notifications&quot;&gt;&lt;/p&gt;
 &lt;p&gt;这几天研究了一下 iOS10 的 User Notifications，相比于老的，新的通知中心增加了一些功能，比如以 Extension 形式提供给用户使用的 &lt;code&gt;UNNotificationContentExtension（通知内容扩展）&lt;/code&gt; ；供开发者自定义通知触发条件的 &lt;code&gt;UNNotificationTrigger（触发条件设定）&lt;/code&gt;；以及提供用户可加入 &lt;code&gt;UNNotificationAttachment（通知附件）&lt;/code&gt; 用来预览。除此之外苹果的 PDF 上还写其它几项优势：&lt;/p&gt;
@@ -161,7 +161,7 @@
     <link href="http://yoursite.com/2016/06/17/Swift%20Cache%20-%20Track/"/>
     <id>http://yoursite.com/2016/06/17/Swift Cache - Track/</id>
     <published>2016-06-17T04:47:53.000Z</published>
-    <updated>2016-06-20T12:31:42.000Z</updated>
+    <updated>2016-06-30T11:25:19.000Z</updated>
     
     <content type="html">&lt;h3 id=&quot;u5F15_u8A00&quot;&gt;&lt;a href=&quot;#u5F15_u8A00&quot; class=&quot;headerlink&quot; title=&quot;引言&quot;&gt;&lt;/a&gt;引言&lt;/h3&gt;&lt;p&gt;开始萌生出要写这个 &lt;a href=&quot;https://github.com/maquannene/Track&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;&lt;strong&gt;Cache&lt;/strong&gt;&lt;/a&gt; 念头，是想要练习一下 &lt;code&gt;Swift&lt;/code&gt; 这门语言，顺便实战 &lt;code&gt;GCD 达到多线程安全&lt;/code&gt; 和思考 &lt;code&gt;如何写一个易用的库&lt;/code&gt;。所以大概花了一个礼拜的时间完成了初级版，后续断断续续修补功能又花了两个礼拜，最终在 v1.2.0 的时候，达到了一个让我比较满意的程度。&lt;/p&gt;
 &lt;p&gt;这个库没有用到特别高深的技巧，也没有特别复杂的算法，但是完成的过程让我学习到了很多东西，如果你想要实战 GCD 的基本用法、又或者是想要学习库基本的设计等等，建议读下去。&lt;/p&gt;
@@ -169,10 +169,12 @@
 &lt;h3 id=&quot;u52A8_u624B_u5199_u4E4B_u524D&quot;&gt;&lt;a href=&quot;#u52A8_u624B_u5199_u4E4B_u524D&quot; class=&quot;headerlink&quot; title=&quot;动手写之前&quot;&gt;&lt;/a&gt;动手写之前&lt;/h3&gt;&lt;p&gt;在开始写这个库之前，我已经拜读过 Objective-C 的一些 Cache 的源码，例如 Star 比较多的 &lt;a href=&quot;https://github.com/tumblr/TMCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;TMCache&lt;/a&gt; 以及它的改良版 &lt;a href=&quot;https://github.com/pinterest/PINCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;PINCache&lt;/a&gt;，以及功能不是那么强大的 EGOCache 和 SDImageCache，当然还有大名鼎鼎的 &lt;a href=&quot;https://github.com/ibireme/YYCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;YYCache&lt;/a&gt;。相比之下 Swift 的此类库就相对少一些，&lt;a href=&quot;https://github.com/aschuch/AwesomeCache&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;AwesomeCache&lt;/a&gt; 算是 Star 相对多一些的库了，其他类似 Haneke 功能不在对比的范围内。&lt;/p&gt;
 &lt;p&gt;我对几个功能齐全的库的同步读写做了一个大概的测试（这里没有将任何一个 Swift 库加入对比中，因为确实没有找到功能比较齐全的库，比如 AwesomeCache 是没有区分 Memory 和 Disk 的，并且功能比较少。AwesomeCache 的 Memory 直接用的是 NSCache，所以我将 NSCache 加入了测试中）结果如下图：&lt;/p&gt;
 &lt;p&gt;下图为 &lt;code&gt;MemoryCache&lt;/code&gt; 对随机产生的不重复 key value 数组进行读写测试：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;&lt;br&gt;&lt;img src=&quot;http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot;overflow: hidden;&quot;&gt;&lt;br&gt;&lt;img src=&quot;http://ww3.sinaimg.cn/large/65312d9agw1f4ykk6mghoj20py0ig75w.jpg&quot; width=&quot;300&quot; style=&quot;float: left;&quot;&gt;&lt;img src=&quot;http://ww4.sinaimg.cn/large/65312d9agw1f4ykk81bclj20pq0iidhg.jpg&quot; width=&quot;300&quot; style=&quot;float: left;&quot;&gt;&lt;br&gt;&lt;/p&gt;
+
 &lt;p&gt;YY 和 Track 内部都采用了 LRU 淘汰算法，PIN 和 TM 有简单的淘汰功能，但并没有引入 LRU 算法，所以在写入后的淘汰数据阶段 YY 和 Track 要快于其他 Cache 的重排序淘汰。其中 TM 速度非常慢，原因在于 TM 的 GCD 调度策略存在很大的问题，会导致同步小数据读写性能都损耗在 GCD 的调度上。这里值得一说的是 NSCache 对随机 key value 的读写性能不错，尤其是读，但是一旦出现相似形数据，性能就会变得非常低。&lt;/p&gt;
 &lt;p&gt;下图为 &lt;code&gt;DiskCache&lt;/code&gt; 对随机产生的不重复 key value 数组进行读写测试：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;&lt;br&gt;&lt;img src=&quot;http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg&quot; width=&quot;400&quot; height=&quot;300&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot;overflow: hidden;&quot;&gt;&lt;br&gt;&lt;img src=&quot;http://ww2.sinaimg.cn/large/65312d9agw1f4yk70sq6sj20p60iawfn.jpg&quot; width=&quot;300&quot; style=&quot;float: left;&quot;&gt;&lt;img src=&quot;http://ww2.sinaimg.cn/large/65312d9agw1f4yk724h6tj20ou0iegmt.jpg&quot; width=&quot;300&quot; style=&quot;float: left;&quot;&gt;&lt;br&gt;&lt;/p&gt;
+
 &lt;p&gt;很明显，底层采用 sqlite 的 YY 性能要高于其他所有基于文件系统的库，所以这里基本可以分为 YYDiskCache 和 其他DiskCache。&lt;/p&gt;
 &lt;h3 id=&quot;u5F00_u59CB_u52A8_u624B_u5199&quot;&gt;&lt;a href=&quot;#u5F00_u59CB_u52A8_u624B_u5199&quot; class=&quot;headerlink&quot; title=&quot;开始动手写&quot;&gt;&lt;/a&gt;开始动手写&lt;/h3&gt;&lt;p&gt;在动手之前，已经了解到了各个库的优劣，所以在写的时候，我尽量提取了一些优点融入了 Track 中，接下来会主要针对以下几点进行说明，某些点对缓存的性能起到了决定性的作用：&lt;/p&gt;
 &lt;h4 id=&quot;1-_u7EBF_u7A0B_u8C03_u5EA6&quot;&gt;&lt;a href=&quot;#1-_u7EBF_u7A0B_u8C03_u5EA6&quot; class=&quot;headerlink&quot; title=&quot;1.线程调度&quot;&gt;&lt;/a&gt;1.线程调度&lt;/h4&gt;&lt;p&gt;良好的线程调度，是高性能的一个重要保证，如果没有使用良好的线程调度，就会造成上图中 TMMemoryCache 那种结果。（下面都是针对同步操作的效率的讨论，异步操作讨论意义不大）&lt;/p&gt;
